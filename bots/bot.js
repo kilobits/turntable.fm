@@ -8,6 +8,7 @@ var auto = false;
 var autobop = 0;
 var waskicked = false;
 var songlimit = false;
+var usersList = { };
 var bUser = '4e67bde34fe7d01d92027940';
 var imports = {
 	repl: require('repl'),
@@ -127,6 +128,7 @@ Bot.prototype.bindHandlers = function() {
 	this.speechHandlers['show-greeting'] = this.onShowGreeting.bind(this);
 	this.speechHandlers['reject-greeting'] = this.onRejectGreeting.bind(this);
 	this.speechHandlers['pending-greetings'] = this.onPendingGreetings.bind(this);
+	this.speechHandlers['firedrill'] = this.onDrill.bind(this);
 };
 
 Bot.prototype.readGreetings = function() {
@@ -275,12 +277,22 @@ Bot.prototype.onBooze = function() {
 };
 
 Bot.prototype.onMoo = function() {
-	this.say('I\'m not a cow, but oka - MOOOOOOOO!');
+	this.say('I\'m not a cow, but oka-MOOOOOOOOOO!');
 };
 
 Bot.prototype.onBlab = function() {
 	if (blabber != false){ blabber = false; this.say('I\'m going to shut up now.') }
 	else if (blabber != true){ blabber = true; this.say('I\'m talking again!')}
+};
+
+Bot.prototype.onDrill = function(){
+	this.refreshRoomInfo();
+	var thisdjs = this.roomInfo.room.metadata.djs
+	this.ttapi.remDj(thisdjs[0]);
+	this.ttapi.remDj(thisdjs[1]);
+	this.ttapi.remDj(thisdjs[2]);
+	this.ttapi.remDj(thisdjs[3]);
+	this.ttapi.remDj(thisdjs[4]);
 };
 
 Bot.prototype.onAuto = function() {
@@ -766,7 +778,7 @@ Bot.prototype.onRegistered = function(data) {
 		}
 		if (blabber != false) {this.say(this.greeting(user)); }
 	}
-};
+  }
 
 MS_FROM_S = 1000;
 S_FROM_M = 60;
@@ -1041,7 +1053,8 @@ Bot.ownCommands = [
 	'passout',
 	'settheme',
 	'newname',
-	'autome'
+	'autome',
+	'firedrill'
 ];
 
 Bot.qCommands = [
