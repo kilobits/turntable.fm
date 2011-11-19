@@ -70,7 +70,7 @@ Bot.prototype.bindHandlers = function() {
 	this.ttapi.on('new_moderator', this.onNewModerator.bind(this));
 	this.ttapi.on('roomChanged', this.onRoomInfo.bind(this));
 	this.ttapi.on('roomChanged', this.initDjList.bind(this));
-		this.ttapi.on('roomChanged', this.initBanList.bind(this));
+	this.ttapi.on('roomChanged', this.initBanList.bind(this));
 	this.ttapi.on('deregistered', this.onDeregister.bind(this));
 	this.ttapi.on('add_dj', this.onAddDj.bind(this));
 	this.ttapi.on('add_dj', this.onLonelyAdd.bind(this));
