@@ -1,6 +1,7 @@
 // Copyright 2011 Vineet Kumar
 
 var bac = 0; 
+var isOut = false;
 var theTheme = 'Dubstep/Electro';
 var blabber = true;
 var auto = false;
@@ -73,9 +74,7 @@ Bot.prototype.bindHandlers = function() {
 	this.ttapi.on('roomChanged', this.initBanList.bind(this));
 	this.ttapi.on('deregistered', this.onDeregister.bind(this));
 	this.ttapi.on('add_dj', this.onAddDj.bind(this));
-	this.ttapi.on('add_dj', this.onLonelyAdd.bind(this));
 	this.ttapi.on('rem_dj', this.onRemDj.bind(this));
-	this.ttapi.on('rem_dj', this.onLonelyRem.bind(this));
 	this.ttapi.on('newsong', this.onNewSong.bind(this));
 	this.ttapi.on('nosong', this.onNoSong.bind(this));
 	this.ttapi.on('update_votes', this.onUpdateVotes.bind(this));
@@ -112,17 +111,13 @@ Bot.prototype.bindHandlers = function() {
 	this.speechHandlers['drink'] = this.onDrink.bind(this);
 	this.speechHandlers['shot'] = this.onShot.bind(this);
 	this.speechHandlers['smack'] = this.onSmack.bind(this);
-	//this.speechHandlers['lonely'] = this.onAddLonely.bind(this);
-	//this.speechHandlers['notlonely'] = this.onRemLonely.bind(this);
 	this.speechHandlers['go'] = this.onGo.bind(this);
 	this.speechHandlers['theme'] = this.onGetTheme.bind(this);
 	this.speechHandlers['settheme'] = this.onSetTheme.bind(this);
 	this.speechHandlers['newname'] = this.onNewName.bind(this);
 	this.speechHandlers['blab'] = this.onBlab.bind(this);
-	this.speechHandlers['passout'] = this.onPassTest.bind(this);
 	this.speechHandlers['autome'] = this.onAuto.bind(this);
 	this.speechHandlers['autobop'] = this.onAutoBop.bind(this);
-	//this.speechHandlers['dj'] = this.onCalldj.bind(this);
 	this.speechHandlers['ban'] = this.onBan.bind(this);
 	this.speechHandlers['unban'] = this.onUnban.bind(this);
 	this.speechHandlers['bans'] = this.onBans.bind(this);
@@ -308,8 +303,11 @@ Bot.prototype.onAutoBop = function(text, number) {
 }
 
 Bot.prototype.onFan = function(text, userid, username) {
+	if (isOut != true){
 	this.ttapi.becomeFan(userid);
 	this.say('Fanned!');
+	}else{
+	this.say('/me can\'t fan while passed out.')}
 };
 
 Bot.prototype.onUnfan = function(text, userid, username) {
@@ -334,7 +332,8 @@ Bot.prototype.onGrope = function(text, userid, username) {
 };
 
 Bot.prototype.onDrink = function(text, userid, username) {
-	if (bac == 0){ this.say(imports.rsp.sober()); this.say('/me drinks'); bac++;}
+	if (isOut != true){
+		if (bac == 0){ this.say(imports.rsp.sober()); this.say('/me drinks'); bac++;}
 		else if (bac == 1){ this.say(imports.rsp.onedrink()); this.say('/me drinks'); bac++;}
 		else if (bac > 1 && bac < 5){ this.say(imports.rsp.buzzed()); this.say('/me drinks'); bac++;}
 		else if (bac >= 5 && bac < 10){ this.say(imports.rsp.drunk()); this.say('/me drinks'); bac++;}
@@ -342,13 +341,16 @@ Bot.prototype.onDrink = function(text, userid, username) {
 		else if (bac >= 15){ 
 			this.say(imports.rsp.passedout()); 
 			this.say('/me passes out');
-			//passOut();
+			setTimeout(function(){ isOut = false; }, 180000);
+			isOut = true;
 			bac = 0;
-	}
+			}
+		}else{ this.say('/me is passed out.') }
 };
 
 Bot.prototype.onShot = function(text, userid, username) {
-	if (bac == 0){ this.say(imports.rsp.sober()); this.say('/me takes a shot'); bac++;bac++;}
+	if (isOut != true){
+		if (bac == 0){ this.say(imports.rsp.sober()); this.say('/me takes a shot'); bac++;bac++;}
 		else if (bac == 1){ this.say(imports.rsp.onedrink()); this.say('/me takes a shot'); bac++;bac++;}
 		else if (bac > 1 && bac < 5){ this.say(imports.rsp.buzzed()); this.say('/me takes a shot'); bac++;bac++;}
 		else if (bac >= 5 && bac < 10){ this.say(imports.rsp.drunk()); this.say('/me takes a shot'); bac++;bac++;}
@@ -356,51 +358,18 @@ Bot.prototype.onShot = function(text, userid, username) {
 		else if (bac >= 15){
 			this.say(imports.rsp.passedout()); 
 			this.say('/me passes out');
-			//passOut();
+			setTimeout(function(){ isOut = false; }, 180000);
+			isOut = true;
 			bac = 0;
-	}
-};
-
-Bot.prototype.onAddLonely = function() {
-	this.refreshRoomInfo();
-	var howDj = this.roomInfo.room.metadata.djs;
-	if (howDj[1] == null) {
-		this.ttapi.addDj();
-	}
-};
-
-Bot.prototype.onRemLonely = function() {
-	this.ttapi.remDj(bUser);
-};
-
-Bot.prototype.onLonelyAdd = function() {
-	this.refreshRoomInfo();
-	var howDj = this.roomInfo.room.metadata.djs;
-	if (howDj[1] == null) {
-		//this.ttapi.addDj();
-	}else if (bUser == howDj[0] || bUser == howDj[1] || bUser == howDj[2] || bUser == howDj[3] || bUser == howDj[4]){
-			this.ttapi.remDj(bUser);
-	}
-};
-
-Bot.prototype.onLonelyRem = function() {
-//	this.refreshRoomInfo();
-//	var howDj = this.roomInfo.room.metadata.djs;
-//	if (howDj[1] == null) {
-//		this.ttapi.addDj();
-//	}
-//	this.say('Looks like you\'re the only DJ! Use *lonely for some company.')
+			}
+	}else{ this.say('/me is passed out.') }
 };
 
 Bot.prototype.onBonus = function(text, userid, username) {
-	if (!this.currentSong) {
-	       return;
-	}
-	if (this.currentSong.bonusBy) {
-		return;
-	} else {
+	if (isOut != true){
 		this.ttapi.vote('up');
-		this.currentSong.bonusBy = userid;
+	}else{
+		this.say('/me can\'t bop while passed out.')
 	}
 };
 
@@ -411,16 +380,6 @@ Bot.prototype.onAlbum = function() {
 				.replace(/\{artist\}/g, this.currentSong.song.metadata.artist)
 				.replace(/\{album\}/g, this.currentSong.song.metadata.album || "(unknown)"));
 	}
-};
-
-Bot.prototype.onPassTest = function() {
-	setTimeout(function(){this.ttapi.roomRegister('4eb8992ea3f7513f23002298')}, 60000);
-	this.ttapi.roomDeregister();
-};
-
-Bot.prototype.onPassOut = function() {
-	setTimeout(function(){this.ttapi.roomRegister('4eb8992ea3f7513f23002298')}, 60000);
-	this.ttapi.roomDeregister();
 };
 
 /**
@@ -1004,7 +963,7 @@ Bot.prototype.onNewSong = function(data) {
 	djstats.play(song);
 	this.currentSong = new imports.stats.SongStats(song, this.users[song.djid]);
 	if (auto == true && userid == "4e0ff328a3f751670a084ba6"){ this.ttapi.vote('up'); };
-	if (autobop > 0) {this.ttapi.vote('up'); autobop--;}
+	if (autobop > 0 && isOut != true) {this.ttapi.vote('up'); autobop--;}
 };
 
 Bot.prototype.finishSong = function() {
