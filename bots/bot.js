@@ -1,5 +1,13 @@
 // Copyright 2011 Vineet Kumar
 
+var bac = 0; 
+var theTheme = 'Dubstep/Electro';
+var blabber = true;
+var auto = false;
+var autobop = 0;
+var waskicked = false;
+var songlimit = false;
+var bUser = '4e67bde34fe7d01d92027940';
 var imports = {
 	repl: require('repl'),
 	ttapi: require('ttapi'),
@@ -7,9 +15,9 @@ var imports = {
 	banlist: require('./banlist'),
 	djlist: require('./djlist'),
 	Store: require('./store').Store,
-	stats: require('./stats')
+	stats: require('./stats'),
+	rsp: require('./response')
 };
-
 Bot = function(configName) {
 	this.ttapi = null;
 	this.configName = configName || process.argv[2] || Bot.usage();
@@ -18,7 +26,7 @@ Bot = function(configName) {
 	this.speechHandlers = {};
 	this.users = {};
 	this.useridsByName = {};
-	this.usernamesById = {};
+	this.userNamesById = {};
 	this.activity = {};
 	this.djs = {};
 	/** @type SongStats */
@@ -62,18 +70,27 @@ Bot.prototype.bindHandlers = function() {
 	this.ttapi.on('new_moderator', this.onNewModerator.bind(this));
 	this.ttapi.on('roomChanged', this.onRoomInfo.bind(this));
 	this.ttapi.on('roomChanged', this.initDjList.bind(this));
-	this.ttapi.on('roomChanged', this.initBanList.bind(this));
+		this.ttapi.on('roomChanged', this.initBanList.bind(this));
 	this.ttapi.on('deregistered', this.onDeregister.bind(this));
 	this.ttapi.on('add_dj', this.onAddDj.bind(this));
+	this.ttapi.on('add_dj', this.onLonelyAdd.bind(this));
 	this.ttapi.on('rem_dj', this.onRemDj.bind(this));
+	this.ttapi.on('rem_dj', this.onLonelyRem.bind(this));
 	this.ttapi.on('newsong', this.onNewSong.bind(this));
 	this.ttapi.on('nosong', this.onNoSong.bind(this));
 	this.ttapi.on('update_votes', this.onUpdateVotes.bind(this));
 	this.speechHandlers['help'] = this.onHelp.bind(this);
-	this.speechHandlers['commands'] = this.onHelpCommands.bind(this);
-	this.speechHandlers['mod-commands'] = this.onHelpModCommands.bind(this);
-	this.speechHandlers['bonus'] = this.onBonus.bind(this);
-	this.speechHandlers['bonys'] = this.onBonus.bind(this);
+	this.speechHandlers['commands'] = this.onAllCommands.bind(this);
+	this.speechHandlers['cmd'] = this.onAllCommands.bind(this);
+	this.speechHandlers['cmds'] = this.onAllCommands.bind(this);
+	this.speechHandlers['queue'] = this.onQueueCommands.bind(this);
+	this.speechHandlers['fun'] = this.onFunCommands.bind(this);
+	this.speechHandlers['drunk'] = this.onDrunkCommands.bind(this);
+	this.speechHandlers['modstuff'] = this.onHelpModCommands.bind(this);
+	this.speechHandlers['more'] = this.onMoreCommands.bind(this);
+	this.speechHandlers['bop'] = this.onBonus.bind(this);
+	this.speechHandlers['fanme'] = this.onFan.bind(this);
+	this.speechHandlers['unfanme'] = this.onUnfan.bind(this);
 	this.speechHandlers['album'] = this.onAlbum.bind(this);
 	this.speechHandlers['last'] = this.onLast.bind(this);
 	this.speechHandlers['plays'] = this.onPlays.bind(this);
@@ -86,6 +103,26 @@ Bot.prototype.bindHandlers = function() {
 	this.speechHandlers['removeme'] = this.onRemoveme.bind(this);
 	this.speechHandlers['remove'] = this.onRemove.bind(this);
 	this.speechHandlers['remove-first'] = this.onRemoveFirst.bind(this);
+	this.speechHandlers['kiss'] = this.onKiss.bind(this);
+	this.speechHandlers['booze'] = this.onBooze.bind(this);
+	this.speechHandlers['moo'] = this.onMoo.bind(this);
+	this.speechHandlers['love'] = this.onLove.bind(this);
+	this.speechHandlers['hug'] = this.onHug.bind(this);
+	this.speechHandlers['grope'] = this.onGrope.bind(this);
+	this.speechHandlers['drink'] = this.onDrink.bind(this);
+	this.speechHandlers['shot'] = this.onShot.bind(this);
+	this.speechHandlers['smack'] = this.onSmack.bind(this);
+	//this.speechHandlers['lonely'] = this.onAddLonely.bind(this);
+	//this.speechHandlers['notlonely'] = this.onRemLonely.bind(this);
+	this.speechHandlers['go'] = this.onGo.bind(this);
+	this.speechHandlers['theme'] = this.onGetTheme.bind(this);
+	this.speechHandlers['settheme'] = this.onSetTheme.bind(this);
+	this.speechHandlers['newname'] = this.onNewName.bind(this);
+	this.speechHandlers['blab'] = this.onBlab.bind(this);
+	this.speechHandlers['passout'] = this.onPassTest.bind(this);
+	this.speechHandlers['autome'] = this.onAuto.bind(this);
+	this.speechHandlers['autobop'] = this.onAutoBop.bind(this);
+	//this.speechHandlers['dj'] = this.onCalldj.bind(this);
 	this.speechHandlers['ban'] = this.onBan.bind(this);
 	this.speechHandlers['unban'] = this.onUnban.bind(this);
 	this.speechHandlers['bans'] = this.onBans.bind(this);
@@ -102,22 +139,6 @@ Bot.prototype.readGreetings = function() {
 		this.greetings = data;
 		console.log('loaded %d greetings', Object.keys(this.greetings).length);
 	}.bind(this));
-	imports.Store.read(this.config.pending_greetings_filename, function(data) {
-		this.pendingGreetings = data;
-		console.log('loaded %d pending greetings', Object.keys(this.pendingGreetings).length);
-	}.bind(this));
-};
-
-Bot.prototype.writeGreetings = function() {
-	imports.Store.write(this.config.greetings_filename, this.greetings,
-		console.log.bind(this, 'saved %d greetings to %s',
-		       	Object.keys(this.greetings).length, this.config.greetings_filename));
-};
-
-Bot.prototype.writePendingGreetings = function() {
-	imports.Store.write(this.config.pending_greetings_filename, this.pendingGreetings,
-		console.log.bind(this, 'saved %d pending greetings to %s',
-		       	Object.keys(this.pendingGreetings).length, this.config.pending_greetings_filename));
 };
 
 Bot.prototype.readActivity = function() {
@@ -133,6 +154,19 @@ Bot.prototype.writeActivity = function() {
 			console.log.bind(this, 'Activity data saved to %s', this.config.activity_filename));
 	}
 };
+
+Bot.prototype.writeGreetings = function() {
+	imports.Store.write(this.config.greetings_filename, this.greetings,
+		console.log.bind(this, 'saved %d greetings to %s',
+		       	Object.keys(this.greetings).length, this.config.greetings_filename));
+};
+
+Bot.prototype.writePendingGreetings = function() {
+	imports.Store.write(this.config.pending_greetings_filename, this.pendingGreetings,
+		console.log.bind(this, 'saved %d pending greetings to %s',
+		       	Object.keys(this.pendingGreetings).length, this.config.pending_greetings_filename));
+};
+
 
 Bot.prototype.readUsernames = function() {
 	imports.Store.read(this.config.usernames_filename, function(data) {
@@ -174,20 +208,53 @@ Bot.prototype.onSpeak = function(data) {
 			return;
 		}
 	}
+	if (Bot.ownCommands.indexOf(command) !== -1) {
+		if (Bot.theOwners.indexOf(data.userid) === -1) {
+			this.say('You ain\'t my owner.');
+			return;
+		}
+	}
 	if (command in this.speechHandlers) {
                 this.speechHandlers[command](data.text, data.userid, data.name);
 	}
 };
 
 Bot.prototype.onHelp = function() {
-	this.say(this.config.messages.help);
+	var helpline = this.config.messages.help
+	this.say(helpline.replace(/\{theme\}/g, theTheme));
 };
 
-Bot.prototype.onHelpCommands = function() {
-	this.say('commands: ' +
+Bot.prototype.onQueueCommands = function() {
+	this.say('Queue commands: ' +
+			Object.keys(this.speechHandlers)
+				.filter(function(s) { return Bot.qCommands.indexOf(s) !== -1})
+				.map(function(s) { return "*" + s; }).join(', '));
+};
+
+Bot.prototype.onFunCommands = function() {
+	this.say('fun commands: ' +
+			Object.keys(this.speechHandlers)
+				.filter(function(s) { return Bot.funCommands.indexOf(s) !== -1})
+				.map(function(s) { return "*" + s; }).join(', '));
+};
+
+Bot.prototype.onDrunkCommands = function() {
+	this.say('drunk commands: ' +
+			Object.keys(this.speechHandlers)
+				.filter(function(s) { return Bot.drunkCommands.indexOf(s) !== -1})
+				.map(function(s) { return "*" + s; }).join(', '));
+};
+
+Bot.prototype.onAllCommands = function() {
+	this.say('My commands: ' +
 			Object.keys(this.speechHandlers)
 				.filter(function(s) { return Bot.moderatorCommands.indexOf(s) === -1})
-				.map(function(s) { return "*" + s; }).join(', '));
+				.filter(function(s) { return Bot.moreCommands.indexOf(s) === -1})
+				.filter(function(s) { return Bot.funCommands.indexOf(s) === -1})
+				.filter(function(s) { return Bot.ownCommands.indexOf(s) === -1})
+				.filter(function(s) { return Bot.qCommands.indexOf(s) === -1})
+				.filter(function(s) { return Bot.drunkCommands.indexOf(s) === -1})
+				.map(function(s) { return "*" + s; }).join(', ')+ ' *whorebot.');
 };
 
 Bot.prototype.onHelpModCommands = function() {
@@ -197,22 +264,143 @@ Bot.prototype.onHelpModCommands = function() {
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
+Bot.prototype.onMoreCommands = function() {
+	this.say('more commands: ' +
+			Object.keys(this.speechHandlers)
+				.filter(function(s) { return Bot.moreCommands.indexOf(s) !== -1})
+				.map(function(s) { return "*" + s; }).join(', '));
+};
+
+Bot.prototype.onKiss = function() {
+	this.say(imports.rsp.kiss());
+};
+
+Bot.prototype.onBooze = function() {
+	this.say(imports.rsp.booze());
+};
+
+Bot.prototype.onMoo = function() {
+	this.say('I\'m not a cow, but oka - MOOOOOOOO!');
+};
+
+Bot.prototype.onBlab = function() {
+	if (blabber != false){ blabber = false; this.say('I\'m going to shut up now.') }
+	else if (blabber != true){ blabber = true; this.say('I\'m talking again!')}
+};
+
+Bot.prototype.onAuto = function() {
+	if (auto != false){ auto = false; this.say('No bop for you.') }
+	else if (auto != true){ auto = true; this.say('I bop now.')}
+};
+
+Bot.prototype.onAutoBop = function(text, number) {
+	var numBop = Bot.splitCommand(text)[1];
+	if (!numBop) {
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <number, left, clear>");
+		return;
+	}
+	else if (numBop == "clear"){this.say('Turning off AutoBop.'); autobop = 0;}
+	else if (numBop == "left"){this.say('I will autobop '+autobop+' more times.')}
+	else {
+		this.say('Will autobop the next '+numBop+' songs.')
+		autobop = numBop;
+	}
+}
+
+Bot.prototype.onFan = function(text, userid, username) {
+	this.ttapi.becomeFan(userid);
+	this.say('Fanned!');
+};
+
+Bot.prototype.onUnfan = function(text, userid, username) {
+	this.ttapi.removeFan(userid);
+	this.say('I hope it wasn\'t me...');
+};
+
+Bot.prototype.onLove = function(text, userid, username) {
+	this.say('I love you, '+username);
+};
+
+Bot.prototype.onHug = function(text, userid, username) {
+	this.say('/me hugs '+username);
+};
+
+Bot.prototype.onGrope = function(text, userid, username) {
+	if (userid != '4e619cc9a3f7514df80f739c') {
+		this.say(imports.rsp.grope().replace(/\{user.name\}/g, username));
+		}else{
+		this.say('Oh, Mistress Zmbee! Please don\'t stop...');
+		}
+};
+
+Bot.prototype.onDrink = function(text, userid, username) {
+	if (bac == 0){ this.say(imports.rsp.sober()); this.say('/me drinks'); bac++;}
+		else if (bac == 1){ this.say(imports.rsp.onedrink()); this.say('/me drinks'); bac++;}
+		else if (bac > 1 && bac < 5){ this.say(imports.rsp.buzzed()); this.say('/me drinks'); bac++;}
+		else if (bac >= 5 && bac < 10){ this.say(imports.rsp.drunk()); this.say('/me drinks'); bac++;}
+		else if (bac >= 10 && bac < 15){ this.say(imports.rsp.wasted()); this.say('/me drinks'); bac++;}
+		else if (bac >= 15){ 
+			this.say(imports.rsp.passedout()); 
+			this.say('/me passes out');
+			//passOut();
+			bac = 0;
+	}
+};
+
+Bot.prototype.onShot = function(text, userid, username) {
+	if (bac == 0){ this.say(imports.rsp.sober()); this.say('/me takes a shot'); bac++;bac++;}
+		else if (bac == 1){ this.say(imports.rsp.onedrink()); this.say('/me takes a shot'); bac++;bac++;}
+		else if (bac > 1 && bac < 5){ this.say(imports.rsp.buzzed()); this.say('/me takes a shot'); bac++;bac++;}
+		else if (bac >= 5 && bac < 10){ this.say(imports.rsp.drunk()); this.say('/me takes a shot'); bac++;bac++;}
+		else if (bac >= 10 && bac < 15){ this.say(imports.rsp.wasted()); this.say('/me takes a shot'); bac++;bac++;}
+		else if (bac >= 15){
+			this.say(imports.rsp.passedout()); 
+			this.say('/me passes out');
+			//passOut();
+			bac = 0;
+	}
+};
+
+Bot.prototype.onAddLonely = function() {
+	this.refreshRoomInfo();
+	var howDj = this.roomInfo.room.metadata.djs;
+	if (howDj[1] == null) {
+		this.ttapi.addDj();
+	}
+};
+
+Bot.prototype.onRemLonely = function() {
+	this.ttapi.remDj(bUser);
+};
+
+Bot.prototype.onLonelyAdd = function() {
+	this.refreshRoomInfo();
+	var howDj = this.roomInfo.room.metadata.djs;
+	if (howDj[1] == null) {
+		//this.ttapi.addDj();
+	}else if (bUser == howDj[0] || bUser == howDj[1] || bUser == howDj[2] || bUser == howDj[3] || bUser == howDj[4]){
+			this.ttapi.remDj(bUser);
+	}
+};
+
+Bot.prototype.onLonelyRem = function() {
+//	this.refreshRoomInfo();
+//	var howDj = this.roomInfo.room.metadata.djs;
+//	if (howDj[1] == null) {
+//		this.ttapi.addDj();
+//	}
+//	this.say('Looks like you\'re the only DJ! Use *lonely for some company.')
+};
+
 Bot.prototype.onBonus = function(text, userid, username) {
 	if (!this.currentSong) {
 	       return;
 	}
-	if (this.currentSong.dj.userid === userid) {
-		this.say(this.config.messages.selfBonus
-				.replace(/{user\.name\}/g, username));
-	} else if (this.currentSong.bonusBy) {
-		this.say(this.config.messages.bonusAlreadyUsed
-				.replace(/\{user.name\}/g, this.lookupUsername(this.currentSong.bonusBy)));
+	if (this.currentSong.bonusBy) {
+		return;
 	} else {
 		this.ttapi.vote('up');
 		this.currentSong.bonusBy = userid;
-		this.say(this.config.messages.bonus
-				.replace(/\{user.name\}/g, this.lookupUsername(this.currentSong.bonusBy))
-				.replace(/\{dj.name\}/g, this.currentSong.dj.name));
 	}
 };
 
@@ -223,6 +411,16 @@ Bot.prototype.onAlbum = function() {
 				.replace(/\{artist\}/g, this.currentSong.song.metadata.artist)
 				.replace(/\{album\}/g, this.currentSong.song.metadata.album || "(unknown)"));
 	}
+};
+
+Bot.prototype.onPassTest = function() {
+	setTimeout(function(){this.ttapi.roomRegister('4eb8992ea3f7513f23002298')}, 60000);
+	this.ttapi.roomDeregister();
+};
+
+Bot.prototype.onPassOut = function() {
+	setTimeout(function(){this.ttapi.roomRegister('4eb8992ea3f7513f23002298')}, 60000);
+	this.ttapi.roomDeregister();
 };
 
 /**
@@ -250,16 +448,71 @@ Bot.prototype.onLast = function(text, unused_userid, unused_username) {
 	}
 	if (last) {
 		var age_ms = new Date() - new Date(last);
-		var age_m = Math.floor(age_ms / 1000 / 60);
-		var age = age_m + " minutes";
-		if (age_m > 120) {
-			age = Math.floor(age_m / 60) + " hours";
-		}
+		var age_h = Math.floor(age_ms / 1000 / 3600);
 		this.say(this.config.messages.lastActivity
 				.replace(/\{user\.name\}/g, subject_name)
-				.replace(/\{age\}/g, age));
+				.replace(/\{age\}/g, age_h + " hours"));
 	} else {
 		this.say(this.config.messages.lastActivityUnknown.replace(/\{user\.name\}/g, subject_name));
+	}
+};
+
+Bot.prototype.onSmack  = function(text, unused_userid, unused_username) {
+	var subject_name = Bot.splitCommand(text)[1];
+	if (!subject_name) {
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <username>");
+		return;
+	}
+	var last = null;
+	var userid = this.roomInfo.room.metadata.users;
+	
+	if (subject_name.indexOf(userid).name === 1) {
+		this.say('Step One Done!');
+		//var subjectid = this.useridsByName[subject_name];
+		this.say('/me smacks '+subject_name+'pretty hard');
+	}else {
+		this.say('/me smacks '+subject_name);
+	}
+};
+
+Bot.prototype.onGo = function(text, room) {
+	var room_name = Bot.splitCommand(text)[1];
+	if (!room_name) {
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <room name>");
+		return;
+	}else if (room_name == "zmbeeparty"){
+		this.say('Going to the Zmbee Party <3');
+		this.ttapi.roomRegister('4ebb3f7167db4632ad1335a1');
+	}else if (room_name == "bots"){
+		this.say('Going to YayRamen!');
+		this.ttapi.roomRegister('4ec345804fe7d0727a0020a3');
+	}else {
+		this.say('Room not added to *Go yet, dummy.')
+	}
+};
+
+Bot.prototype.onSetTheme = function(text, theme) {
+	var newTheme = Bot.splitCommand(text)[1];
+	if (!newTheme) {
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <theme>");
+		return;
+	}else {
+		this.say('Room theme is set to '+newTheme)
+		theTheme = newTheme;
+	}
+};
+
+Bot.prototype.onGetTheme = function(){
+	this.say('Current theme is: '+theTheme)
+}
+
+Bot.prototype.onNewName = function(text, newname) {
+	var new_name = Bot.splitCommand(text)[1];
+	if (!new_name) {
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <new name>");
+		return;
+	}else {
+		this.ttapi.modifyName(new_name);
 	}
 };
 
@@ -268,7 +521,7 @@ Bot.prototype.lookupUsername = function(userid) {
 };
 
 Bot.prototype.onPlays = function(text, userid, username) {
-	var userid = bot.currentSong.dj.userid;
+	var userid = this.currentSong.dj.userid;
 	var subject_name = Bot.splitCommand(text)[1];
 	if (subject_name) {
 		userid = this.useridsByName[subject_name];
@@ -280,6 +533,7 @@ Bot.prototype.onPlays = function(text, userid, username) {
 				.replace(/\{plays\}/g, stats.plays));
 	}
 };
+
 
 Bot.prototype.onList = function(text, userid, username) {
 	if (!this.djList.active) {
@@ -413,6 +667,7 @@ Bot.prototype.onBan = function(text, userid, username) {
 			.replace(/\{user\.name\}/g, subject_name)
 			.replace(/\{banner\.name\}/g, username)
 			.replace(/\{ban\.comment\}/g, comment));
+	this.ttapi.bootUser(subjectid, comment);
 };
 
 Bot.prototype.onBans = function(text, userid, username) {
@@ -532,26 +787,25 @@ Bot.prototype.onPendingGreetings = function(text, userid, username) {
 			       	Object.keys(this.pendingGreetings).map(this.lookupUsername.bind(this)).join(', ')));
 };
 
-
 Bot.prototype.onRegistered = function(data) {
 	if (this.debug) {
 		console.dir(data);
 	}
 	user = data.user[0];
-	if (user.userid !== this.config.userid) {
+		if (user.userid !== this.config.userid) {
 		this.recordActivity(user.userid);
 		this.refreshRoomInfo();
 		if (this.banList) {
 			var ban_comment = this.banList.query(user.userid);
 			if (ban_comment) {
 				this.say(this.config.messages.banned
-						.replace(/\{user\.name\}/g, subject_name)
+						.replace(/\{user\.name\}/g, user.name)
 						.replace(/\{ban\.comment\}/g, ban_comment));
-				this.ttapi.bootUser(user.userid, banned_reason);
+				this.ttapi.bootUser(user.userid, ban_comment);
 				return;
 			}
 		}
-		this.say(this.greeting(user));
+		if (blabber != false) {this.say(this.greeting(user)); }
 	}
 };
 
@@ -587,7 +841,6 @@ Bot.prototype.djAnnouncement = function(user) {
 		.replace(/\{user\.points\}/g, user.points)
 		.replace(/\{user\.fans\}/g, user.fans);
 };
-
 
 randomElement = function(ar) {
 	return ar[Math.floor(Math.random() * ar.length)];
@@ -692,21 +945,31 @@ Bot.prototype.onAddDj = function(data) {
 				this.say(this.config.messages.wrongDj
 					.replace(/\{right.name\}/g, this.lookupUsername(next))
 					.replace(/\{wrong.name\}/g, user.name));
+				this.ttapi.remDj(user.userid);
+				waskicked = true;
+				waskicked2 = true;
 				return;
 			}
 		}
 	}
+	if (waskicked == false){
+	if (blabber != false){
+	if  (data.user[0].userid != bUser){
 	this.say(this.djAnnouncement(user));
+	}}}else{
+	waskicked = false;}
 };
 
 Bot.prototype.djSummary = function(stats) {
 	var message = randomElement(this.config.messages.djSummaries);
+	if (stats.plays != 0){
 	return message
 		.replace(/\{user\.name\}/g, stats.user.name)
 		.replace(/\{user\.points\}/g, stats.user.points)
 		.replace(/\{lames\}/g, stats.lames)
 		.replace(/\{gain\}/g, stats.gain)
 		.replace(/\{plays\}/g, stats.plays);
+}
 };
 
 Bot.prototype.onRemDj = function(data) {
@@ -715,16 +978,18 @@ Bot.prototype.onRemDj = function(data) {
 	}
 	var user = data.user[0];
 	var stats = this.djs[user.userid];
-	if (stats) {
+	if (waskicked == false){
+	if (blabber != false){
+	if (stats && data.user[0].userid != bUser) {
 		stats.update(user);
 		delete this.djs[user.userid];
 		this.say(this.djSummary(stats));
-	}
+	}}}else{ waskicked = false;}
 	if (this.djList.active) {
 		var next = this.djList.next();
-		if (next) {
+		if (next) { if (waskicked2 == false){
 			this.say(this.config.messages.nextDj
-					.replace(/\{user.name\}/, this.lookupUsername(next)));
+					.replace(/\{user.name\}/, this.lookupUsername(next)));}else{waskicked2 = false;}
 		};
 	}
 };
@@ -737,8 +1002,9 @@ Bot.prototype.onNewSong = function(data) {
 	var userid = data.room.metadata.current_dj;
 	var djstats = this.djs[userid] || (this.djs[userid] = new imports.stats.DjStats(this.users[userid]));
 	djstats.play(song);
-	this.finishSong();
 	this.currentSong = new imports.stats.SongStats(song, this.users[song.djid]);
+	if (auto == true && userid == "4e0ff328a3f751670a084ba6"){ this.ttapi.vote('up'); };
+	if (autobop > 0) {this.ttapi.vote('up'); autobop--;}
 };
 
 Bot.prototype.finishSong = function() {
@@ -770,10 +1036,14 @@ Bot.prototype.onNoSong = function(data) {
 	if (this.debug) {
 		console.dir(data);
 	}
-	this.finishSong();
 	this.currentSong = null;
 };
 
+Bot.theOwners = [
+	'4e0ff328a3f751670a084ba6',
+	'4e9a7d20a3f7515e6508de50',
+	'4e619cc9a3f7514df80f739c'
+];
 Bot.bareCommands = [
 	'help'
 ];
@@ -781,10 +1051,11 @@ Bot.bareCommands = [
 Bot.moderatorCommands = [
 	'list-on',
 	'list-off',
-	'list-reset',
 	'remove',
-	'add-first',
 	'remove-first',
+	'add-first',
+	'list-reset',
+	'autobop',
 	'ban',
 	'bans',
 	'banned',
@@ -792,7 +1063,47 @@ Bot.moderatorCommands = [
 	'approve-greeting',
 	'reject-greeting',
 	'show-greeting',
-	'pending-greetings'
+	'pending-greetings'	
+];
+
+Bot.funCommands = [
+	'kiss',
+	'booze',
+	'grope',
+	'moo',
+	'hug',
+	'smack',
+	'love'
+];
+
+Bot.ownCommands = [
+	'blab',
+	'go',
+	'passout',
+	'settheme',
+	'newname',
+	'autome'
+];
+
+Bot.qCommands = [
+	'list',
+	'addme',
+	'removeme'
+];
+
+Bot.drunkCommands = [
+	'drink',
+	'shot'
+];
+
+Bot.moreCommands = [
+	'unfanme',
+	'album',
+	'last',
+	'commands',
+	'cmd',
+	'cmds'
+	//'lonely'
 ];
 
 Bot.prototype.recordActivity = function(userid) {
@@ -800,8 +1111,6 @@ Bot.prototype.recordActivity = function(userid) {
 	this.activity[userid] = new Date();
 	this.writeActivity();
 };
-
-
 
 exports.Bot = Bot;
 exports.imports = imports;
