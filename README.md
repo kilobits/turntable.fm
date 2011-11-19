@@ -15,7 +15,7 @@ They are *kiss, *booze, and *grope. They each return a random response
 They are *love and *hug. They just return simple text one-liners
 
 ### Drunk Mode
-Still under development. Users can use *drink or *shot to make the bot take a drink. Each subsequent drink raises the BAC var by 1 or 2 points. Returns random responses based on how high the BAC is. For entertainment. Once BAC is > certain number, bot 'passes out'. I am working on a way to make this affect the bot in some way. Originally, it was going to deregister from the room for a minute or two, but I think I will just make it to where the bot returns a simple /me is passed out when a non-essential command is used, for a set amount of time. Shouldn't be too hard.
+Still under development. Users can use *drink or *shot to make the bot take a drink. Each subsequent drink raises the BAC var by 1 or 2 points. Returns random responses based on how high the BAC is. For entertainment. Once BAC is > certain number, bot 'passes out'. This now triggers an event where any attempt to get the bot to bop/bonus, fan you, or take another shot results in the bot simply saying it is passed out. Passed Out lasts for 3 minutes.
 
 ### Go
 Something for me. *go <room name> will travel the bot to other rooms. 
