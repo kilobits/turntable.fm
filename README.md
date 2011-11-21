@@ -39,3 +39,6 @@ That's all for now. These are all in addition to what Vin has added.
 
 ### Firedrill
 Added *firedrill as an owner command. Boots all DJ's off stage
+
+### Maul
+Just a fun remove dj command. *maul DJNAME escorts DJ off stage.

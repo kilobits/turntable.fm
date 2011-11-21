@@ -129,6 +129,7 @@ Bot.prototype.bindHandlers = function() {
 	this.speechHandlers['reject-greeting'] = this.onRejectGreeting.bind(this);
 	this.speechHandlers['pending-greetings'] = this.onPendingGreetings.bind(this);
 	this.speechHandlers['firedrill'] = this.onDrill.bind(this);
+	this.speechHandlers['maul'] = this.onMaul.bind(this);
 };
 
 Bot.prototype.readGreetings = function() {
@@ -505,6 +506,18 @@ Bot.prototype.onPlays = function(text, userid, username) {
 	}
 };
 
+Bot.prototype.onMaul = function(text, userid, username) {
+	var userid;
+	var subject_name = Bot.splitCommand(text)[1];
+	if (!subject_name) {
+		this.say('Usage: *maul <username>');
+	}else{
+		userid = this.useridsByName[subject_name];
+	}
+	if (userid) {
+		this.ttapi.remDj(userid);
+	}
+};
 
 Bot.prototype.onList = function(text, userid, username) {
 	if (!this.djList.active) {
@@ -1031,6 +1044,7 @@ Bot.moderatorCommands = [
 	'bans',
 	'banned',
 	'unban',
+	'maul',
 	'approve-greeting',
 	'reject-greeting',
 	'show-greeting',
