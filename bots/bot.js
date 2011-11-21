@@ -87,7 +87,9 @@ Bot.prototype.bindHandlers = function() {
 	this.speechHandlers['fun'] = this.onFunCommands.bind(this);
 	this.speechHandlers['drunk'] = this.onDrunkCommands.bind(this);
 	this.speechHandlers['modstuff'] = this.onHelpModCommands.bind(this);
+	this.speechHandlers['qmods'] = this.onQModCommands.bind(this);
 	this.speechHandlers['more'] = this.onMoreCommands.bind(this);
+	this.speechHandlers['greetings'] = this.onGreetCommands.bind(this);
 	this.speechHandlers['bop'] = this.onBonus.bind(this);
 	this.speechHandlers['fanme'] = this.onFan.bind(this);
 	this.speechHandlers['unfanme'] = this.onUnfan.bind(this);
@@ -196,12 +198,22 @@ Bot.prototype.onSpeak = function(data) {
 	this.recordActivity(data.userid);
         var words = data.text.split(/\s+/);
         var command = words[0].toLowerCase();
-        if (command.match(/^[!*\/]/)) {
+        if (command.match(/^[*\/]/)) {
                 command = command.substring(1);
         } else if (Bot.bareCommands.indexOf(data.text) === -1) { // bare commands must match the entire text line
                 return;
         }
 	if (Bot.moderatorCommands.indexOf(command) !== -1) {
+		if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) === -1) {
+			return;
+		}
+	}	
+	if (Bot.qmCommands.indexOf(command) !== -1) {
+		if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) === -1) {
+			return;
+		}
+	}
+	if (Bot.greetCommands.indexOf(command) !== -1) {
 		if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) === -1) {
 			return;
 		}
@@ -223,47 +235,63 @@ Bot.prototype.onHelp = function() {
 };
 
 Bot.prototype.onQueueCommands = function() {
-	this.say('Queue commands: ' +
+	this.say('Queue Commands: ' +
 			Object.keys(this.speechHandlers)
 				.filter(function(s) { return Bot.qCommands.indexOf(s) !== -1})
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onFunCommands = function() {
-	this.say('fun commands: ' +
+	this.say('Fun Commands: ' +
 			Object.keys(this.speechHandlers)
 				.filter(function(s) { return Bot.funCommands.indexOf(s) !== -1})
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onDrunkCommands = function() {
-	this.say('drunk commands: ' +
+	this.say('Drunk Commands: ' +
 			Object.keys(this.speechHandlers)
 				.filter(function(s) { return Bot.drunkCommands.indexOf(s) !== -1})
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
+Bot.prototype.onQModCommands = function() {
+	this.say('Queue Mod Commands: ' +
+			Object.keys(this.speechHandlers)
+				.filter(function(s) { return Bot.qmCommands.indexOf(s) !== -1})
+				.map(function(s) { return "*" + s; }).join(', '));
+};
+
+Bot.prototype.onGreetCommands = function() {
+	this.say('Greeting Commands: ' +
+			Object.keys(this.speechHandlers)
+				.filter(function(s) { return Bot.greetCommands.indexOf(s) !== -1})
+				.map(function(s) { return "*" + s; }).join(', '));
+};
+
 Bot.prototype.onAllCommands = function() {
-	this.say('My commands: ' +
+	this.say('My Commands: ' +
 			Object.keys(this.speechHandlers)
 				.filter(function(s) { return Bot.moderatorCommands.indexOf(s) === -1})
 				.filter(function(s) { return Bot.moreCommands.indexOf(s) === -1})
 				.filter(function(s) { return Bot.funCommands.indexOf(s) === -1})
 				.filter(function(s) { return Bot.ownCommands.indexOf(s) === -1})
 				.filter(function(s) { return Bot.qCommands.indexOf(s) === -1})
+				.filter(function(s) { return Bot.qmCommands.indexOf(s) === -1})
+				.filter(function(s) { return Bot.greetCommands.indexOf(s) === -1})
 				.filter(function(s) { return Bot.drunkCommands.indexOf(s) === -1})
 				.map(function(s) { return "*" + s; }).join(', ')+ ' *whorebot.');
 };
 
 Bot.prototype.onHelpModCommands = function() {
-	this.say('moderator commands: ' +
+	this.say('Mod Commands: ' +
 			Object.keys(this.speechHandlers)
 				.filter(function(s) { return Bot.moderatorCommands.indexOf(s) !== -1})
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onMoreCommands = function() {
-	this.say('more commands: ' +
+	this.say('More Commands: ' +
 			Object.keys(this.speechHandlers)
 				.filter(function(s) { return Bot.moreCommands.indexOf(s) !== -1})
 				.map(function(s) { return "*" + s; }).join(', '));
@@ -1033,22 +1061,14 @@ Bot.bareCommands = [
 ];
 
 Bot.moderatorCommands = [
-	'list-on',
-	'list-off',
-	'remove',
-	'remove-first',
-	'add-first',
-	'list-reset',
+	'qmods',
+	'greetings',
 	'autobop',
 	'ban',
 	'bans',
 	'banned',
 	'unban',
-	'maul',
-	'approve-greeting',
-	'reject-greeting',
-	'show-greeting',
-	'pending-greetings'	
+	'maul'	
 ];
 
 Bot.funCommands = [
@@ -1064,7 +1084,6 @@ Bot.funCommands = [
 Bot.ownCommands = [
 	'blab',
 	'go',
-	'passout',
 	'settheme',
 	'newname',
 	'autome',
@@ -1088,8 +1107,25 @@ Bot.moreCommands = [
 	'last',
 	'commands',
 	'cmd',
-	'cmds'
-	//'lonely'
+	'cmds',
+	'greet'
+
+];
+
+Bot.qmCommands = [
+	'list-on',
+	'list-off',
+	'remove',
+	'remove-first',
+	'add-first',
+	'list-reset'
+];
+
+Bot.greetCommands = [
+	'approve-greeting',
+	'reject-greeting',
+	'show-greeting',
+	'pending-greetings'
 ];
 
 Bot.prototype.recordActivity = function(userid) {
