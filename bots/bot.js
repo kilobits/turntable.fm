@@ -7,7 +7,7 @@ var blabber = true;
 var auto = false;
 var autobop = 0;
 var waskicked = false;
-var songlimit = false;
+var songLimit = 0;
 var usersList = { };
 var bUser = '4e67bde34fe7d01d92027940';
 var imports = {
@@ -121,6 +121,8 @@ Bot.prototype.bindHandlers = function() {
 	this.speechHandlers['blab'] = this.onBlab.bind(this);
 	this.speechHandlers['autome'] = this.onAuto.bind(this);
 	this.speechHandlers['autobop'] = this.onAutoBop.bind(this);
+	this.speechHandlers['limit'] = this.onSongLimit.bind(this);
+	this.speechHandlers['songlimit'] = this.onLimit.bind(this);
 	this.speechHandlers['ban'] = this.onBan.bind(this);
 	this.speechHandlers['unban'] = this.onUnban.bind(this);
 	this.speechHandlers['bans'] = this.onBans.bind(this);
@@ -231,7 +233,27 @@ Bot.prototype.onSpeak = function(data) {
 
 Bot.prototype.onHelp = function() {
 	var helpline = this.config.messages.help
-	this.say(helpline.replace(/\{theme\}/g, theTheme));
+	if (this.djList.active && songLimit > 0){
+		this.say(helpline
+			.replace(/\{theme\}/g, theTheme)
+			.replace(/\{queue\}/g, 'there is a queue, type *addme to get on it')
+			.replace(/\{limit\}/g, 'and there\'s a '+songLimit+' song limit'));
+	}else if (this.djList.active && songLimit == 0){
+		this.say(helpline
+			.replace(/\{theme\}/g, theTheme)
+			.replace(/\{queue\}/g, 'there is a queue, type *addme to get on it')
+			.replace(/\{limit\}/g, 'and there is no song limit.'));
+	}else if (!this.djList.active && songLimit > 0){
+		this.say(helpline
+			.replace(/\{theme\}/g, theTheme)
+			.replace(/\{queue\}/g, 'it\'s FFA to get on deck')
+			.replace(/\{limit\}/g, 'and there\'s a '+songLimit+' song limit'));
+	}else if (!this.djList.active && songLimit == 0){
+		this.say(helpline
+			.replace(/\{theme\}/g, theTheme)
+			.replace(/\{queue\}/g, 'it\'s FFA to get on deck')
+			.replace(/\{limit\}/g, 'and there is no song limit.'));
+	}
 };
 
 Bot.prototype.onQueueCommands = function() {
@@ -341,6 +363,25 @@ Bot.prototype.onAutoBop = function(text, number) {
 		this.say('Will autobop the next '+numBop+' songs.')
 		autobop = numBop;
 	}
+}
+
+Bot.prototype.onSongLimit = function(text, number) {
+	var sLimit = Bot.splitCommand(text)[1];
+	if (!sLimit) {
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <number, is, clear>");
+		return;
+	}
+	else if (sLimit == "clear"){this.say('No more song limit!'); songLimit = 0;}
+	else {
+		this.say('The song limit is now '+sLimit+'.')
+		songLimit = sLimit;
+	}
+}
+
+Bot.prototype.onLimit = function(){
+	if (songLimit > 0){ this.say('There is currently a '+songLimit+' song limit.')
+	}else{ this.say('There is no song limit.') 
+	};
 }
 
 Bot.prototype.onFan = function(text, userid, username) {
@@ -486,6 +527,9 @@ Bot.prototype.onGo = function(text, room) {
 	}else if (room_name == "bots"){
 		this.say('Going to YayRamen!');
 		this.ttapi.roomRegister('4ec345804fe7d0727a0020a3');
+	}else if (room_name == "alphabeats"){
+		this.say('Going to Alphabeats Soup!');
+		this.ttapi.roomRegister('4e5582db14169c5e62324d64');
 	}else {
 		this.say('Room not added to *Go yet, dummy.')
 	}
@@ -531,6 +575,7 @@ Bot.prototype.onPlays = function(text, userid, username) {
 		this.say(this.config.messages.plays
 				.replace(/\{user\.name\}/g, stats.user.name)
 				.replace(/\{plays\}/g, stats.plays));
+	}
 	}
 };
 
@@ -1013,6 +1058,7 @@ Bot.prototype.onNewSong = function(data) {
 	var song = data.room.metadata.current_song;
 	var userid = data.room.metadata.current_dj;
 	var djstats = this.djs[userid] || (this.djs[userid] = new imports.stats.DjStats(this.users[userid]));
+	if (songLimit > 0){ if( djstats.plays >= songLimit ){this.say('Hey,'+djstats.user.name+', you\'ve already played '+songLimit+' songs, time for someone else to spin!'); this.ttapi.remDj(userid)} }
 	djstats.play(song);
 	this.currentSong = new imports.stats.SongStats(song, this.users[song.djid]);
 	if (auto == true && userid == "4e0ff328a3f751670a084ba6"){ this.ttapi.vote('up'); };
@@ -1063,6 +1109,7 @@ Bot.bareCommands = [
 Bot.moderatorCommands = [
 	'qmods',
 	'greetings',
+	'limit',
 	'autobop',
 	'ban',
 	'bans',
