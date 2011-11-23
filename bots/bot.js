@@ -25,7 +25,15 @@ Bot = function(configName) {
 	this.configName = configName || process.argv[2] || Bot.usage();
 	this.config = {};
 	this.logChats = false;
-	this.speechHandlers = {};
+	this.commandHandlers = {};	
+	this.modCommandHandlers = {};
+	this.ownerCommandHandlers = {};
+	this.moreCommandHandlers = {};
+	this.funCommandHandlers = {};
+	this.queueCommandHandlers = {};
+	this.qmodCommandHandlers = {};
+	this.greetCommandHandlers = {};
+	this.drunkCommandHandlers = {};
 	this.users = {};
 	this.useridsByName = {};
 	this.userNamesById = {};
@@ -79,61 +87,65 @@ Bot.prototype.bindHandlers = function() {
 	this.ttapi.on('newsong', this.onNewSong.bind(this));
 	this.ttapi.on('nosong', this.onNoSong.bind(this));
 	this.ttapi.on('update_votes', this.onUpdateVotes.bind(this));
-	this.speechHandlers['help'] = this.onHelp.bind(this);
-	this.speechHandlers['commands'] = this.onAllCommands.bind(this);
-	this.speechHandlers['cmd'] = this.onAllCommands.bind(this);
-	this.speechHandlers['cmds'] = this.onAllCommands.bind(this);
-	this.speechHandlers['queue'] = this.onQueueCommands.bind(this);
-	this.speechHandlers['fun'] = this.onFunCommands.bind(this);
-	this.speechHandlers['drunk'] = this.onDrunkCommands.bind(this);
-	this.speechHandlers['modstuff'] = this.onHelpModCommands.bind(this);
-	this.speechHandlers['qmods'] = this.onQModCommands.bind(this);
-	this.speechHandlers['more'] = this.onMoreCommands.bind(this);
-	this.speechHandlers['greetings'] = this.onGreetCommands.bind(this);
-	this.speechHandlers['bop'] = this.onBonus.bind(this);
-	this.speechHandlers['fanme'] = this.onFan.bind(this);
-	this.speechHandlers['unfanme'] = this.onUnfan.bind(this);
-	this.speechHandlers['album'] = this.onAlbum.bind(this);
-	this.speechHandlers['last'] = this.onLast.bind(this);
-	this.speechHandlers['plays'] = this.onPlays.bind(this);
-	this.speechHandlers['list'] = this.onList.bind(this);
-	this.speechHandlers['list-on'] = this.onListOn.bind(this);
-	this.speechHandlers['list-off'] = this.onListOff.bind(this);
-	this.speechHandlers['list-reset'] = this.onListReset.bind(this);
-	this.speechHandlers['addme'] = this.onAddme.bind(this);
-	this.speechHandlers['add-first'] = this.onAddFirst.bind(this);
-	this.speechHandlers['removeme'] = this.onRemoveme.bind(this);
-	this.speechHandlers['remove'] = this.onRemove.bind(this);
-	this.speechHandlers['remove-first'] = this.onRemoveFirst.bind(this);
-	this.speechHandlers['kiss'] = this.onKiss.bind(this);
-	this.speechHandlers['booze'] = this.onBooze.bind(this);
-	this.speechHandlers['moo'] = this.onMoo.bind(this);
-	this.speechHandlers['love'] = this.onLove.bind(this);
-	this.speechHandlers['hug'] = this.onHug.bind(this);
-	this.speechHandlers['grope'] = this.onGrope.bind(this);
-	this.speechHandlers['drink'] = this.onDrink.bind(this);
-	this.speechHandlers['shot'] = this.onShot.bind(this);
-	this.speechHandlers['smack'] = this.onSmack.bind(this);
-	this.speechHandlers['go'] = this.onGo.bind(this);
-	this.speechHandlers['theme'] = this.onGetTheme.bind(this);
-	this.speechHandlers['settheme'] = this.onSetTheme.bind(this);
-	this.speechHandlers['newname'] = this.onNewName.bind(this);
-	this.speechHandlers['blab'] = this.onBlab.bind(this);
-	this.speechHandlers['autome'] = this.onAuto.bind(this);
-	this.speechHandlers['autobop'] = this.onAutoBop.bind(this);
-	this.speechHandlers['limit'] = this.onSongLimit.bind(this);
-	this.speechHandlers['songlimit'] = this.onLimit.bind(this);
-	this.speechHandlers['ban'] = this.onBan.bind(this);
-	this.speechHandlers['unban'] = this.onUnban.bind(this);
-	this.speechHandlers['bans'] = this.onBans.bind(this);
-	this.speechHandlers['banned'] = this.onBanned.bind(this);
-	this.speechHandlers['greet'] = this.onGreet.bind(this);
-	this.speechHandlers['approve-greeting'] = this.onApproveGreeting.bind(this);
-	this.speechHandlers['show-greeting'] = this.onShowGreeting.bind(this);
-	this.speechHandlers['reject-greeting'] = this.onRejectGreeting.bind(this);
-	this.speechHandlers['pending-greetings'] = this.onPendingGreetings.bind(this);
-	this.speechHandlers['firedrill'] = this.onDrill.bind(this);
-	this.speechHandlers['maul'] = this.onMaul.bind(this);
+	/* User Commands */
+	this.commandHandlers['help'] = this.onHelp.bind(this);
+	this.commandHandlers['commands'] = this.onAllCommands.bind(this);
+	this.commandHandlers['queue'] = this.onQueueCommands.bind(this);
+	this.commandHandlers['fun'] = this.onFunCommands.bind(this);
+	this.commandHandlers['drunk'] = this.onDrunkCommands.bind(this);
+	this.commandHandlers['modstuff'] = this.onHelpModCommands.bind(this);
+	this.commandHandlers['more'] = this.onMoreCommands.bind(this);
+	this.commandHandlers['bop'] = this.onBonus.bind(this);
+	this.commandHandlers['fanme'] = this.onFan.bind(this);
+	this.commandHandlers['songlimit'] = this.onLimit.bind(this);
+	this.moreCommandHandlers['cmd'] = this.onAllCommands.bind(this);
+	this.moreCommandHandlers['cmds'] = this.onAllCommands.bind(this);
+	this.moreCommandHandlers['unfanme'] = this.onUnfan.bind(this);
+	this.moreCommandHandlers['album'] = this.onAlbum.bind(this);
+	this.moreCommandHandlers['last'] = this.onLast.bind(this);
+	this.moreCommandHandlers['plays'] = this.onPlays.bind(this);
+	this.queueCommandHandlers['list'] = this.onList.bind(this);
+	this.queueCommandHandlers['addme'] = this.onAddme.bind(this);
+	this.queueCommandHandlers['removeme'] = this.onRemoveme.bind(this);
+	this.funCommandHandlers['kiss'] = this.onKiss.bind(this);
+	this.funCommandHandlers['booze'] = this.onBooze.bind(this);
+	this.funCommandHandlers['moo'] = this.onMoo.bind(this);
+	this.funCommandHandlers['love'] = this.onLove.bind(this);
+	this.funCommandHandlers['hug'] = this.onHug.bind(this);
+	this.funCommandHandlers['grope'] = this.onGrope.bind(this);
+	this.funCommandHandlers['smack'] = this.onSmack.bind(this);
+	this.drunkCommandHandlers['drink'] = this.onDrink.bind(this);
+	this.drunkCommandHandlers['shot'] = this.onShot.bind(this);
+	/* Mod Commands */
+	this.modCommandHandlers['qmods'] = this.onQModCommands.bind(this);
+	this.modCommandHandlers['greetings'] = this.onGreetCommands.bind(this);
+	this.modCommandHandlers['theme'] = this.onGetTheme.bind(this);
+	this.modCommandHandlers['settheme'] = this.onSetTheme.bind(this);
+	this.modCommandHandlers['ban'] = this.onBan.bind(this);
+	this.modCommandHandlers['unban'] = this.onUnban.bind(this);
+	this.modCommandHandlers['bans'] = this.onBans.bind(this);
+	this.modCommandHandlers['banned'] = this.onBanned.bind(this);
+	this.modCommandHandlers['greet'] = this.onGreet.bind(this);
+	this.modCommandHandlers['maul'] = this.onMaul.bind(this);
+	this.modCommandHandlers['autobop'] = this.onAutoBop.bind(this);
+	this.modCommandHandlers['limit'] = this.onSongLimit.bind(this);
+	this.qmodCommandHandlers['list-on'] = this.onListOn.bind(this);
+	this.qmodCommandHandlers['list-off'] = this.onListOff.bind(this);
+	this.qmodCommandHandlers['list-reset'] = this.onListReset.bind(this);
+	this.qmodCommandHandlers['add-first'] = this.onAddFirst.bind(this);
+	this.qmodCommandHandlers['remove'] = this.onRemove.bind(this);
+	this.qmodCommandHandlers['remove-first'] = this.onRemoveFirst.bind(this);
+	this.greetCommandHandlers['approve-greeting'] = this.onApproveGreeting.bind(this);
+	this.greetCommandHandlers['show-greeting'] = this.onShowGreeting.bind(this);
+	this.greetCommandHandlers['reject-greeting'] = this.onRejectGreeting.bind(this);
+	this.greetCommandHandlers['pending-greetings'] = this.onPendingGreetings.bind(this);
+	/* Owner Commands */
+	this.ownerCommandHandlers['firedrill'] = this.onDrill.bind(this);
+	this.ownerCommandHandlers['go'] = this.onGo.bind(this);
+	this.ownerCommandHandlers['newname'] = this.onNewName.bind(this);
+	this.ownerCommandHandlers['blab'] = this.onBlab.bind(this);
+	this.ownerCommandHandlers['autome'] = this.onAuto.bind(this);
+
 };
 
 Bot.prototype.readGreetings = function() {
@@ -205,29 +217,17 @@ Bot.prototype.onSpeak = function(data) {
         } else if (Bot.bareCommands.indexOf(data.text) === -1) { // bare commands must match the entire text line
                 return;
         }
-	if (Bot.moderatorCommands.indexOf(command) !== -1) {
-		if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) === -1) {
-			return;
+
+	var handler = null;
+	if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) !== -1) {
+		handler = handler || this.modCommandHandlers[command] || this.qmodCommandHandlers[command] || this.greetCommandHandlers[command];
 		}
-	}	
-	if (Bot.qmCommands.indexOf(command) !== -1) {
-		if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) === -1) {
-			return;
-		}
+	if (Bot.theOwners.indexOf(data.userid) !== -1) {
+		handler = handler || this.ownerCommandHandlers[command];
 	}
-	if (Bot.greetCommands.indexOf(command) !== -1) {
-		if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) === -1) {
-			return;
-		}
-	}
-	if (Bot.ownCommands.indexOf(command) !== -1) {
-		if (Bot.theOwners.indexOf(data.userid) === -1) {
-			this.say('You ain\'t my owner.');
-			return;
-		}
-	}
-	if (command in this.speechHandlers) {
-                this.speechHandlers[command](data.text, data.userid, data.name);
+	handler = handler || this.commandHandlers[command] || this.funCommandHandlers[command] || this.drunkCommandHandlers[command] || this.moreCommandHandlers[command] || this.queueCommandHandlers[command];
+	if (handler) {
+		handler.call(this, data.text, data.userid, data.name);
 	}
 };
 
@@ -242,7 +242,7 @@ Bot.prototype.onHelp = function() {
 		this.say(helpline
 			.replace(/\{theme\}/g, theTheme)
 			.replace(/\{queue\}/g, 'there is a queue, type *addme to get on it')
-			.replace(/\{limit\}/g, 'and there is no song limit.'));
+			.replace(/\{limit\}/g, 'and there is no song limit'));
 	}else if (!this.djList.active && songLimit > 0){
 		this.say(helpline
 			.replace(/\{theme\}/g, theTheme)
@@ -252,70 +252,55 @@ Bot.prototype.onHelp = function() {
 		this.say(helpline
 			.replace(/\{theme\}/g, theTheme)
 			.replace(/\{queue\}/g, 'it\'s FFA to get on deck')
-			.replace(/\{limit\}/g, 'and there is no song limit.'));
+			.replace(/\{limit\}/g, 'and there is no song limit'));
 	}
 };
 
 Bot.prototype.onQueueCommands = function() {
 	this.say('Queue Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.qCommands.indexOf(s) !== -1})
+			Object.keys(this.queueCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onFunCommands = function() {
 	this.say('Fun Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.funCommands.indexOf(s) !== -1})
+			Object.keys(this.funCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onDrunkCommands = function() {
 	this.say('Drunk Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.drunkCommands.indexOf(s) !== -1})
+			Object.keys(this.drunkCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onQModCommands = function() {
 	this.say('Queue Mod Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.qmCommands.indexOf(s) !== -1})
+			Object.keys(this.qmodCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onGreetCommands = function() {
 	this.say('Greeting Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.greetCommands.indexOf(s) !== -1})
+			Object.keys(this.greetCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onAllCommands = function() {
 	this.say('My Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.moderatorCommands.indexOf(s) === -1})
-				.filter(function(s) { return Bot.moreCommands.indexOf(s) === -1})
-				.filter(function(s) { return Bot.funCommands.indexOf(s) === -1})
-				.filter(function(s) { return Bot.ownCommands.indexOf(s) === -1})
-				.filter(function(s) { return Bot.qCommands.indexOf(s) === -1})
-				.filter(function(s) { return Bot.qmCommands.indexOf(s) === -1})
-				.filter(function(s) { return Bot.greetCommands.indexOf(s) === -1})
-				.filter(function(s) { return Bot.drunkCommands.indexOf(s) === -1})
-				.map(function(s) { return "*" + s; }).join(', ')+ ' *whorebot.');
+			Object.keys(this.commandHandlers)
+				.map(function(s) { return "*" + s; }).join(', ')+ ', *whorebot.');
 };
 
 Bot.prototype.onHelpModCommands = function() {
 	this.say('Mod Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.moderatorCommands.indexOf(s) !== -1})
+			Object.keys(this.modCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
 Bot.prototype.onMoreCommands = function() {
 	this.say('More Commands: ' +
-			Object.keys(this.speechHandlers)
-				.filter(function(s) { return Bot.moreCommands.indexOf(s) !== -1})
+			Object.keys(this.moreCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
@@ -575,7 +560,6 @@ Bot.prototype.onPlays = function(text, userid, username) {
 		this.say(this.config.messages.plays
 				.replace(/\{user\.name\}/g, stats.user.name)
 				.replace(/\{plays\}/g, stats.plays));
-	}
 	}
 };
 
@@ -991,6 +975,7 @@ Bot.prototype.onAddDj = function(data) {
 	if (this.debug) {
 		console.dir(data);
 	}
+	this.refreshRoomInfo();
 	var user = data.user[0];
 	this.djs[user.userid] = new imports.stats.DjStats(user);
 	if (this.djList.active) {
@@ -1033,6 +1018,7 @@ Bot.prototype.onRemDj = function(data) {
 	if (this.debug) {
 		console.dir(data);
 	}
+	this.refreshRoomInfo();
 	var user = data.user[0];
 	var stats = this.djs[user.userid];
 	if (waskicked == false){
@@ -1104,75 +1090,6 @@ Bot.theOwners = [
 ];
 Bot.bareCommands = [
 	'help'
-];
-
-Bot.moderatorCommands = [
-	'qmods',
-	'greetings',
-	'limit',
-	'autobop',
-	'ban',
-	'bans',
-	'banned',
-	'unban',
-	'maul'	
-];
-
-Bot.funCommands = [
-	'kiss',
-	'booze',
-	'grope',
-	'moo',
-	'hug',
-	'smack',
-	'love'
-];
-
-Bot.ownCommands = [
-	'blab',
-	'go',
-	'settheme',
-	'newname',
-	'autome',
-	'firedrill'
-];
-
-Bot.qCommands = [
-	'list',
-	'addme',
-	'removeme'
-];
-
-Bot.drunkCommands = [
-	'drink',
-	'shot'
-];
-
-Bot.moreCommands = [
-	'unfanme',
-	'album',
-	'last',
-	'commands',
-	'cmd',
-	'cmds',
-	'greet'
-
-];
-
-Bot.qmCommands = [
-	'list-on',
-	'list-off',
-	'remove',
-	'remove-first',
-	'add-first',
-	'list-reset'
-];
-
-Bot.greetCommands = [
-	'approve-greeting',
-	'reject-greeting',
-	'show-greeting',
-	'pending-greetings'
 ];
 
 Bot.prototype.recordActivity = function(userid) {
