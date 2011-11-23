@@ -9,7 +9,6 @@ var autobop = 0;
 var waskicked = false;
 var songLimit = 0;
 var usersList = { };
-var bUser = '4e67bde34fe7d01d92027940';
 var imports = {
 	repl: require('repl'),
 	ttapi: require('ttapi'),
@@ -90,6 +89,7 @@ Bot.prototype.bindHandlers = function() {
 	/* User Commands */
 	this.commandHandlers['help'] = this.onHelp.bind(this);
 	this.commandHandlers['commands'] = this.onAllCommands.bind(this);
+	this.commandHandlers['theme'] = this.onGetTheme.bind(this);
 	this.commandHandlers['queue'] = this.onQueueCommands.bind(this);
 	this.commandHandlers['fun'] = this.onFunCommands.bind(this);
 	this.commandHandlers['drunk'] = this.onDrunkCommands.bind(this);
@@ -98,6 +98,7 @@ Bot.prototype.bindHandlers = function() {
 	this.commandHandlers['bop'] = this.onBonus.bind(this);
 	this.commandHandlers['fanme'] = this.onFan.bind(this);
 	this.commandHandlers['songlimit'] = this.onLimit.bind(this);
+	this.commandHandlers['randomtest'] = this.onRandomTest.bind(this);
 	this.moreCommandHandlers['cmd'] = this.onAllCommands.bind(this);
 	this.moreCommandHandlers['cmds'] = this.onAllCommands.bind(this);
 	this.moreCommandHandlers['unfanme'] = this.onUnfan.bind(this);
@@ -119,7 +120,6 @@ Bot.prototype.bindHandlers = function() {
 	/* Mod Commands */
 	this.modCommandHandlers['qmods'] = this.onQModCommands.bind(this);
 	this.modCommandHandlers['greetings'] = this.onGreetCommands.bind(this);
-	this.modCommandHandlers['theme'] = this.onGetTheme.bind(this);
 	this.modCommandHandlers['settheme'] = this.onSetTheme.bind(this);
 	this.modCommandHandlers['ban'] = this.onBan.bind(this);
 	this.modCommandHandlers['unban'] = this.onUnban.bind(this);
@@ -996,7 +996,7 @@ Bot.prototype.onAddDj = function(data) {
 	}
 	if (waskicked == false){
 	if (blabber != false){
-	if  (data.user[0].userid != bUser){
+	if  (data.user[0].userid != this.config.userid){
 	this.say(this.djAnnouncement(user));
 	}}}else{
 	waskicked = false;}
@@ -1023,7 +1023,7 @@ Bot.prototype.onRemDj = function(data) {
 	var stats = this.djs[user.userid];
 	if (waskicked == false){
 	if (blabber != false){
-	if (stats && data.user[0].userid != bUser) {
+	if (stats && data.user[0].userid != this.config.userid) {
 		stats.update(user);
 		delete this.djs[user.userid];
 		this.say(this.djSummary(stats));
@@ -1036,7 +1036,11 @@ Bot.prototype.onRemDj = function(data) {
 		};
 	}
 };
-
+Bot.prototype.onRandomTest = function() {
+	var chance = Math.random();
+	if (chance > .5){ this.say('yes')}
+	else{this.say('no');}
+}
 Bot.prototype.onNewSong = function(data) {
 	if (this.debug) {
 		console.dir(data);
@@ -1044,7 +1048,13 @@ Bot.prototype.onNewSong = function(data) {
 	var song = data.room.metadata.current_song;
 	var userid = data.room.metadata.current_dj;
 	var djstats = this.djs[userid] || (this.djs[userid] = new imports.stats.DjStats(this.users[userid]));
-	if (songLimit > 0){ if( djstats.plays >= songLimit ){this.say('Hey,'+djstats.user.name+', you\'ve already played '+songLimit+' songs, time for someone else to spin!'); this.ttapi.remDj(userid)} }
+	if (songLimit > 0){
+		if( djstats.plays >= songLimit ){
+		this.say('Hey,'+djstats.user.name+', you\'ve already played '+songLimit+' songs, time for someone else to spin!'); 
+		var chance = Math.random();
+		if (chance > .5){this.ttapi.remDj(userid)}
+		} 
+	}
 	djstats.play(song);
 	this.currentSong = new imports.stats.SongStats(song, this.users[song.djid]);
 	if (auto == true && userid == "4e0ff328a3f751670a084ba6"){ this.ttapi.vote('up'); };
