@@ -570,7 +570,7 @@ Bot.prototype.onMaul = function(text, userid, username) {
 	var subject_name = Bot.splitCommand(text)[1];
 	if (!subject_name) {
 		this.say('Usage: *maul <username>');
-	}else if (subject_name = "everyone"){	
+	}else if (subject_name == "everyone"){	
 		this.refreshRoomInfo();
 		var thisdjs = this.roomInfo.room.metadata.djs
 		this.ttapi.remDj(thisdjs[0]);
@@ -1004,11 +1004,9 @@ Bot.prototype.onAddDj = function(data) {
 			if (user.userid === next) {
 				this.djList.remove(user.userid);
 			} else {
-				var thenext = this.lookupUsername(next);
-				var nextuser  = thenext;
 				this.say(this.config.messages.wrongDj
 					.replace(/\{right.name\}/g, this.lookupUsername(next))
-					.replace(/\{wrong.name\}/g, user.name)+'They have 60 seconds to claim their spot!');
+					.replace(/\{wrong.name\}/g, user.name));
 				this.ttapi.remDj(user.userid);
 				waskicked = true;
 				waskicked2 = true;
@@ -1042,8 +1040,6 @@ Bot.prototype.djDive = function(stats) {
 	if (stats.plays != 0){
 	return message
 		.replace(/\{user\.name\}/g, stats.user.name)
-		.replace(/\{user\.points\}/g, stats.user.points)
-		.replace(/\{lames\}/g, stats.lames)
 		.replace(/\{gain\}/g, stats.gain)
 		.replace(/\{plays\}/g, stats.plays);
 	}else {
