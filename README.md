@@ -48,3 +48,6 @@ Added *limit and *songlimit. *limit useage: *limit <num/clear> *limit 5 will set
 
 ### Help
 I also updated to *help. It now tells the current theme (from *settheme), whether or not the queue is active ( *list-on ) [ I updated the code for the dj queue to remove anyone who takes a spot that isn't theirs. Now I need to find a way to take a name off of the queue if person leaves the room, and after a set amount of afk time, so other people get to dj. ] and then it says the songlimit. So, if the song limit is 5, the theme is Dubstep/Electro, and the queue is on, this is the output of *help "Hi, the theme is Dubstep/Electro, there is a dj queue so type *addme to get on it, there is a 5 song limit."
+
+### Stagedive
+Added *stagedive. While DJing, if you want to get down, you can alternatively type *stagedive, and you will get a custom sending off while the bot boots you off stage. kind of fun.

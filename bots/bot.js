@@ -5,10 +5,13 @@ var isOut = false;
 var theTheme = 'Dubstep/Electro';
 var blabber = true;
 var auto = false;
+var placeholder;
 var autobop = 0;
 var waskicked = false;
+var waskicked2 = false;
 var songLimit = 0;
 var usersList = { };
+var stagedive = false;
 var imports = {
 	repl: require('repl'),
 	ttapi: require('ttapi'),
@@ -91,20 +94,20 @@ Bot.prototype.bindHandlers = function() {
 	this.commandHandlers['commands'] = this.onAllCommands.bind(this);
 	this.commandHandlers['theme'] = this.onGetTheme.bind(this);
 	this.commandHandlers['queue'] = this.onQueueCommands.bind(this);
+	this.commandHandlers['plays'] = this.onPlays.bind(this);
+	this.commandHandlers['songlimit'] = this.onLimit.bind(this);
 	this.commandHandlers['fun'] = this.onFunCommands.bind(this);
 	this.commandHandlers['drunk'] = this.onDrunkCommands.bind(this);
 	this.commandHandlers['modstuff'] = this.onHelpModCommands.bind(this);
-	this.commandHandlers['more'] = this.onMoreCommands.bind(this);
 	this.commandHandlers['bop'] = this.onBonus.bind(this);
 	this.commandHandlers['fanme'] = this.onFan.bind(this);
-	this.commandHandlers['songlimit'] = this.onLimit.bind(this);
-	this.commandHandlers['randomtest'] = this.onRandomTest.bind(this);
+	this.commandHandlers['stagedive'] = this.onstageDive.bind(this)
+	this.commandHandlers['more'] = this.onMoreCommands.bind(this);
 	this.moreCommandHandlers['cmd'] = this.onAllCommands.bind(this);
 	this.moreCommandHandlers['cmds'] = this.onAllCommands.bind(this);
 	this.moreCommandHandlers['unfanme'] = this.onUnfan.bind(this);
 	this.moreCommandHandlers['album'] = this.onAlbum.bind(this);
 	this.moreCommandHandlers['last'] = this.onLast.bind(this);
-	this.moreCommandHandlers['plays'] = this.onPlays.bind(this);
 	this.queueCommandHandlers['list'] = this.onList.bind(this);
 	this.queueCommandHandlers['addme'] = this.onAddme.bind(this);
 	this.queueCommandHandlers['removeme'] = this.onRemoveme.bind(this);
@@ -503,21 +506,13 @@ Bot.prototype.onSmack  = function(text, unused_userid, unused_username) {
 
 Bot.prototype.onGo = function(text, room) {
 	var room_name = Bot.splitCommand(text)[1];
-	if (!room_name) {
-		this.say("Usage: " + Bot.splitCommand(text)[0] + " <room name>");
-		return;
-	}else if (room_name == "zmbeeparty"){
-		this.say('Going to the Zmbee Party <3');
-		this.ttapi.roomRegister('4ebb3f7167db4632ad1335a1');
-	}else if (room_name == "bots"){
-		this.say('Going to YayRamen!');
-		this.ttapi.roomRegister('4ec345804fe7d0727a0020a3');
-	}else if (room_name == "alphabeats"){
-		this.say('Going to Alphabeats Soup!');
-		this.ttapi.roomRegister('4e5582db14169c5e62324d64');
-	}else {
-		this.say('Room not added to *Go yet, dummy.')
-	}
+	var room = room_name;
+	if (!room_name) { this.say("Usage: " + Bot.splitCommand(text)[0] + " <room name/id>");	return;	}
+	if (room_name == "zmbeeparty"){ room = '4ebb3f7167db4632ad1335a1'; }
+	if (room_name == "bots"){ room = '4ec345804fe7d0727a0020a3'; }
+	if (room_name == "alphabeats"){ room = '4e5582db14169c5e62324d64'; }
+	this.say('Leaving Now!');
+	this.ttapi.roomRegister(room);
 };
 
 Bot.prototype.onSetTheme = function(text, theme) {
@@ -549,7 +544,7 @@ Bot.prototype.lookupUsername = function(userid) {
 	return this.usernamesById[userid] || "(unknown)";
 };
 
-Bot.prototype.onPlays = function(text, userid, username) {
+Bot.prototype.onPlays = function(text, userid, username){
 	var userid = this.currentSong.dj.userid;
 	var subject_name = Bot.splitCommand(text)[1];
 	if (subject_name) {
@@ -563,11 +558,26 @@ Bot.prototype.onPlays = function(text, userid, username) {
 	}
 };
 
+Bot.prototype.onstageDive = function(text, userid, username){
+	if (this.djs[userid]){
+	stagedive = true;
+	this.ttapi.remDj(userid)
+	}
+}
+
 Bot.prototype.onMaul = function(text, userid, username) {
 	var userid;
 	var subject_name = Bot.splitCommand(text)[1];
 	if (!subject_name) {
 		this.say('Usage: *maul <username>');
+	}else if (subject_name = "everyone"){	
+		this.refreshRoomInfo();
+		var thisdjs = this.roomInfo.room.metadata.djs
+		this.ttapi.remDj(thisdjs[0]);
+		this.ttapi.remDj(thisdjs[1]);
+		this.ttapi.remDj(thisdjs[2]);
+		this.ttapi.remDj(thisdjs[3]);
+		this.ttapi.remDj(thisdjs[4]);
 	}else{
 		userid = this.useridsByName[subject_name];
 	}
@@ -832,10 +842,15 @@ Bot.prototype.onRegistered = function(data) {
 	if (this.debug) {
 		console.dir(data);
 	}
+	this.refreshRoomInfo();
 	user = data.user[0];
+	if (user.acl > 0) {
+		auto = false; 
+		placeholder = autobop;
+		autobop = 0;
+	}
 		if (user.userid !== this.config.userid) {
 		this.recordActivity(user.userid);
-		this.refreshRoomInfo();
 		if (this.banList) {
 			var ban_comment = this.banList.query(user.userid);
 			if (ban_comment) {
@@ -941,6 +956,11 @@ Bot.prototype.onDeregister = function(data) {
 	if (this.debug) {
 		console.dir(data);
 	}
+	if (data.user.acl > 0) {
+		auto = true; 
+		autobop = placeholder;
+		placeholder = 0;
+	}
 	if (data.userid === this.config.userid) {
 		this.roomInfo = null;
 		this.users = {};
@@ -984,9 +1004,11 @@ Bot.prototype.onAddDj = function(data) {
 			if (user.userid === next) {
 				this.djList.remove(user.userid);
 			} else {
+				var thenext = this.lookupUsername(next);
+				var nextuser  = thenext;
 				this.say(this.config.messages.wrongDj
 					.replace(/\{right.name\}/g, this.lookupUsername(next))
-					.replace(/\{wrong.name\}/g, user.name));
+					.replace(/\{wrong.name\}/g, user.name)+'They have 60 seconds to claim their spot!');
 				this.ttapi.remDj(user.userid);
 				waskicked = true;
 				waskicked2 = true;
@@ -1014,6 +1036,22 @@ Bot.prototype.djSummary = function(stats) {
 }
 };
 
+Bot.prototype.djDive = function(stats) {
+	var message = '{user.name} is surfing the crowd, having earned {gain} points off of {plays} songs!'
+	var message2 = '{user.name} tried to surf the crowd, but he ended up knocking his laptop over.'
+	if (stats.plays != 0){
+	return message
+		.replace(/\{user\.name\}/g, stats.user.name)
+		.replace(/\{user\.points\}/g, stats.user.points)
+		.replace(/\{lames\}/g, stats.lames)
+		.replace(/\{gain\}/g, stats.gain)
+		.replace(/\{plays\}/g, stats.plays);
+	}else {
+	return message2
+		.replace(/\{user\.name\}/g, stats.user.name);
+	}
+};
+
 Bot.prototype.onRemDj = function(data) {
 	if (this.debug) {
 		console.dir(data);
@@ -1026,7 +1064,8 @@ Bot.prototype.onRemDj = function(data) {
 	if (stats && data.user[0].userid != this.config.userid) {
 		stats.update(user);
 		delete this.djs[user.userid];
-		this.say(this.djSummary(stats));
+		if (stagedive == true){ this.say(this.djDive(stats));stagedive = false; }else{
+		this.say(this.djSummary(stats));}
 	}}}else{ waskicked = false;}
 	if (this.djList.active) {
 		var next = this.djList.next();
@@ -1099,7 +1138,8 @@ Bot.theOwners = [
 	'4e619cc9a3f7514df80f739c'
 ];
 Bot.bareCommands = [
-	'help'
+	'help',
+	'theme'
 ];
 
 Bot.prototype.recordActivity = function(userid) {
