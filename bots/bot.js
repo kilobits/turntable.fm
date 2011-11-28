@@ -26,7 +26,8 @@ Bot = function(configName) {
 	this.configName = configName || process.argv[2] || Bot.usage();
 	this.config = {};
 	this.logChats = false;
-	this.commandHandlers = {};	
+	this.commandHandlers = {};
+	this.hiddenCommandHandlers = {};	
 	this.modCommandHandlers = {};
 	this.ownerCommandHandlers = {};
 	this.moreCommandHandlers = {};
@@ -152,7 +153,9 @@ Bot.prototype.bindHandlers = function() {
 	this.ownerCommandHandlers['newname'] = this.onNewName.bind(this);
 	this.ownerCommandHandlers['blab'] = this.onBlab.bind(this);
 	this.ownerCommandHandlers['autome'] = this.onAuto.bind(this);
-	/* Hidden Command */
+	/* Hidden Commands */
+	this.hiddenCommandHandlers['party'] = this.onBonus.bind(this);
+	this.hiddenCommandHandlers['bonus'] = this.onBonus.bind(this);
 	
 
 };
