@@ -152,6 +152,8 @@ Bot.prototype.bindHandlers = function() {
 	this.ownerCommandHandlers['newname'] = this.onNewName.bind(this);
 	this.ownerCommandHandlers['blab'] = this.onBlab.bind(this);
 	this.ownerCommandHandlers['autome'] = this.onAuto.bind(this);
+	/* Hidden Command */
+	
 
 };
 
@@ -230,7 +232,7 @@ Bot.prototype.onSpeak = function(data) {
 		handler = handler || this.modCommandHandlers[command] || this.qmodCommandHandlers[command] || this.greetCommandHandlers[command];
 		}
 	if (Bot.theOwners.indexOf(data.userid) !== -1) {
-		handler = handler || this.ownerCommandHandlers[command];
+		handler = handler || this.ownerCommandHandlers[command] || this.modCommandHandlers[command] || this.qmodCommandHandlers[command] || this.greetCommandHandlers[command];
 	}
 	handler = handler || this.commandHandlers[command] || this.funCommandHandlers[command] || this.drunkCommandHandlers[command] || this.moreCommandHandlers[command] || this.queueCommandHandlers[command];
 	if (handler) {
