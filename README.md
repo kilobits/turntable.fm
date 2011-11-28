@@ -57,3 +57,8 @@ Added *boot <username> to kick a user out of the room. Mod command only
 
 ### q, q-, q+
 Shorthand replacements for *list, *addme, and *removeme. Bare commands.
+
+## Other things I've done
+
+### AFK Check
+This is based off of Vin's lookupusernamewithidletime function. What it does it looks up the username and sees how long it's been since they were active. I've applied it to DJing and the Queue. If you've been AFK for more than 10 minutes, bot will escort you on your song. And if you've been afk for more than five minutes, and someone tries to take your spot in line at the DJ queue, you forfeit your spot. Working on cleaning it up.

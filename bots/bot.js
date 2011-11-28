@@ -243,11 +243,11 @@ Bot.prototype.onSpeak = function(data) {
 	}
 };
 
-Bot.prototype.afkCheck = function(userid) {
+Bot.prototype.afkCheck = function(userid, num) {
 var last = this.activity[userid];
 var age_ms = new Date() - new Date(last);
 var age_m = Math.floor(age_ms / 1000 / 60);
-if (age_m > 10) {
+if (age_m > num) {
 return true;  
 };
 return false;
@@ -1045,6 +1045,10 @@ Bot.prototype.onAddDj = function(data) {
 				this.ttapi.remDj(user.userid);
 				waskicked = true;
 				waskicked2 = true;
+				if (this.afkCheck(next, 5) == true) {
+					this.djList.remove(next);
+					this.say(this.lookupUsername(next)+' is AFK, and thus forfeits his spot on the DJ Queue.')
+				}
 				return;
 			}
 		}
@@ -1118,7 +1122,7 @@ Bot.prototype.onNewSong = function(data) {
 	var song = data.room.metadata.current_song;
 	var userid = data.room.metadata.current_dj;
 	var djstats = this.djs[userid] || (this.djs[userid] = new imports.stats.DjStats(this.users[userid]));
-	if (this.afkCheck(userid) == true){ this.say('Sorry, '+djstats.user.name+' , you\'ve been afk 10 minutes, let someone else up.'); this.ttapi.remDj(userid); waskicked = true;}
+	if (this.afkCheck(userid, 10) == true){ this.say('Sorry, '+djstats.user.name+' , you\'ve been afk 10 minutes, let someone else up.'); this.ttapi.remDj(userid); waskicked = true;}
 	if (songLimit > 0){
 		if( djstats.plays >= songLimit ){
 		this.say('Hey,'+djstats.user.name+', you\'ve already played '+songLimit+' songs, time for someone else to spin!'); 
