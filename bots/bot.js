@@ -10,7 +10,6 @@ var autobop = 0;
 var waskicked = false;
 var waskicked2 = false;
 var songLimit = 0;
-var usersList = { };
 var stagedive = false;
 var imports = {
 	repl: require('repl'),
@@ -108,9 +107,13 @@ Bot.prototype.bindHandlers = function() {
 	this.moreCommandHandlers['unfanme'] = this.onUnfan.bind(this);
 	this.moreCommandHandlers['album'] = this.onAlbum.bind(this);
 	this.moreCommandHandlers['last'] = this.onLast.bind(this);
+	this.moreCommandHandlers['limit'] = this.onLimit.bind(this);
 	this.queueCommandHandlers['list'] = this.onList.bind(this);
+	this.queueCommandHandlers['q'] = this.onList.bind(this);
 	this.queueCommandHandlers['addme'] = this.onAddme.bind(this);
+	this.queueCommandHandlers['q+'] = this.onAddme.bind(this);
 	this.queueCommandHandlers['removeme'] = this.onRemoveme.bind(this);
+	this.queueCommandHandlers['q-'] = this.onRemoveme.bind(this);
 	this.funCommandHandlers['kiss'] = this.onKiss.bind(this);
 	this.funCommandHandlers['booze'] = this.onBooze.bind(this);
 	this.funCommandHandlers['moo'] = this.onMoo.bind(this);
@@ -129,9 +132,10 @@ Bot.prototype.bindHandlers = function() {
 	this.modCommandHandlers['bans'] = this.onBans.bind(this);
 	this.modCommandHandlers['banned'] = this.onBanned.bind(this);
 	this.modCommandHandlers['greet'] = this.onGreet.bind(this);
+	this.modCommandHandlers['boot'] = this.onBoot.bind(this);
 	this.modCommandHandlers['maul'] = this.onMaul.bind(this);
 	this.modCommandHandlers['autobop'] = this.onAutoBop.bind(this);
-	this.modCommandHandlers['limit'] = this.onSongLimit.bind(this);
+	this.modCommandHandlers['setlimit'] = this.onSongLimit.bind(this);
 	this.qmodCommandHandlers['list-on'] = this.onListOn.bind(this);
 	this.qmodCommandHandlers['list-off'] = this.onListOff.bind(this);
 	this.qmodCommandHandlers['list-reset'] = this.onListReset.bind(this);
@@ -342,7 +346,7 @@ Bot.prototype.onAuto = function() {
 Bot.prototype.onAutoBop = function(text, number) {
 	var numBop = Bot.splitCommand(text)[1];
 	if (!numBop) {
-		this.say("Usage: " + Bot.splitCommand(text)[0] + " <number, left, clear>");
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <num/left/clear>");
 		return;
 	}
 	else if (numBop == "clear"){this.say('Turning off AutoBop.'); autobop = 0;}
@@ -356,7 +360,7 @@ Bot.prototype.onAutoBop = function(text, number) {
 Bot.prototype.onSongLimit = function(text, number) {
 	var sLimit = Bot.splitCommand(text)[1];
 	if (!sLimit) {
-		this.say("Usage: " + Bot.splitCommand(text)[0] + " <number, is, clear>");
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <num/clear>");
 		return;
 	}
 	else if (sLimit == "clear"){this.say('No more song limit!'); songLimit = 0;}
@@ -511,6 +515,7 @@ Bot.prototype.onGo = function(text, room) {
 	if (room_name == "zmbeeparty"){ room = '4ebb3f7167db4632ad1335a1'; }
 	if (room_name == "bots"){ room = '4ec345804fe7d0727a0020a3'; }
 	if (room_name == "alphabeats"){ room = '4e5582db14169c5e62324d64'; }
+	if (room_name == "metime"){ room = '4ec8aa2414169c121e1d1702'; }
 	this.say('Leaving Now!');
 	this.ttapi.roomRegister(room);
 };
@@ -584,6 +589,19 @@ Bot.prototype.onMaul = function(text, userid, username) {
 	if (userid) {
 		this.ttapi.remDj(userid);
 	}
+};
+
+Bot.prototype.onBoot = function(text, userid, username) {
+	var userid;
+	var subject_name = Bot.splitCommand(text)[1];
+	if (!subject_name) {
+		this.say('Usage: *boot <username>');
+	}else{
+		userid = this.useridsByName[subject_name];
+	}
+	if (userid) {
+		this.ttapi.remDj(userid);
+	}else{this.say('No one in here by the name of '+subject_name)}
 };
 
 Bot.prototype.onList = function(text, userid, username) {
@@ -1135,7 +1153,10 @@ Bot.theOwners = [
 ];
 Bot.bareCommands = [
 	'help',
-	'theme'
+	'theme',
+	'q',
+	'q+',
+	'q-'
 ];
 
 Bot.prototype.recordActivity = function(userid) {
