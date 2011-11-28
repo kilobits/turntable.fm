@@ -237,10 +237,20 @@ Bot.prototype.onSpeak = function(data) {
 	if (Bot.theOwners.indexOf(data.userid) !== -1) {
 		handler = handler || this.ownerCommandHandlers[command] || this.modCommandHandlers[command] || this.qmodCommandHandlers[command] || this.greetCommandHandlers[command];
 	}
-	handler = handler || this.commandHandlers[command] || this.funCommandHandlers[command] || this.drunkCommandHandlers[command] || this.moreCommandHandlers[command] || this.queueCommandHandlers[command];
+	handler = handler || this.commandHandlers[command] || this.funCommandHandlers[command] || this.drunkCommandHandlers[command] || this.moreCommandHandlers[command] || this.queueCommandHandlers[command] || this.hiddenCommandHandlers[command];
 	if (handler) {
 		handler.call(this, data.text, data.userid, data.name);
 	}
+};
+
+Bot.prototype.afkCheck = function(userid) {
+var last = this.activity[userid];
+var age_ms = new Date() - new Date(last);
+var age_m = Math.floor(age_ms / 1000 / 60);
+if (age_m > 10) {
+return true;  
+};
+return false;
 };
 
 Bot.prototype.onHelp = function() {
@@ -1108,6 +1118,7 @@ Bot.prototype.onNewSong = function(data) {
 	var song = data.room.metadata.current_song;
 	var userid = data.room.metadata.current_dj;
 	var djstats = this.djs[userid] || (this.djs[userid] = new imports.stats.DjStats(this.users[userid]));
+	if (this.afkCheck(userid) == true){ this.say('Sorry, '+djstats.user.name+' , you\'ve been afk 10 minutes, let someone else up.'); this.ttapi.remDj(userid); waskicked = true;}
 	if (songLimit > 0){
 		if( djstats.plays >= songLimit ){
 		this.say('Hey,'+djstats.user.name+', you\'ve already played '+songLimit+' songs, time for someone else to spin!'); 
