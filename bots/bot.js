@@ -599,7 +599,8 @@ Bot.prototype.onBoot = function(text, userid, username) {
 	}else{
 		userid = this.useridsByName[subject_name];
 	}
-	if (userid) {
+	if (userid == this.config.userid) { this.say('I won\'t boot myself, dummy.'); return;}
+	else if (userid) {
 		this.ttapi.remDj(userid);
 	}else{this.say('No one in here by the name of '+subject_name)}
 };
@@ -730,6 +731,7 @@ Bot.prototype.onBan = function(text, userid, username) {
 	var comment = split[1] || "";
 	var subjectid = this.useridsByName[subject_name];
 	if (!subjectid) { return; }
+	if (subjectid == this.config.userid) { this.say('I won\'t ban myself, dummy.'); return;}
 	this.banList.ban(subjectid, comment + " -- " + username + " " + new Date());
 	this.banList.save(this.config.banlist_filename);
 	this.say(this.config.messages.ban
