@@ -52,11 +52,14 @@ I also updated to *help. It now tells the current theme (from *settheme), whethe
 ### Stagedive
 Added *stagedive. While DJing, if you want to get down, you can alternatively type *stagedive, and you will get a custom sending off while the bot boots you off stage. kind of fun.
 
-### Boot
-Added *boot <username> to kick a user out of the room. Mod command only
+### gtfo (formally boot)
+Added *gtfo <username> to kick a user out of the room. Mod command only
 
 ### q, q-, q+
 Shorthand replacements for *list, *addme, and *removeme. Bare commands.
+
+### Afk
+Simple owner command *afk num will change the timeout for afk. Default on bot start is 10 minutes. *afk 25 would set a 25 minute timeout, for example.
 
 ## Other things I've done
 
