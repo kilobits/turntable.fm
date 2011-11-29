@@ -11,6 +11,7 @@ var waskicked = false;
 var waskicked2 = false;
 var songLimit = 0;
 var stagedive = false;
+var afk = 10;
 var imports = {
 	repl: require('repl'),
 	ttapi: require('ttapi'),
@@ -133,7 +134,7 @@ Bot.prototype.bindHandlers = function() {
 	this.modCommandHandlers['bans'] = this.onBans.bind(this);
 	this.modCommandHandlers['banned'] = this.onBanned.bind(this);
 	this.modCommandHandlers['greet'] = this.onGreet.bind(this);
-	this.modCommandHandlers['boot'] = this.onBoot.bind(this);
+	this.modCommandHandlers['gtfo'] = this.onBoot.bind(this);
 	this.modCommandHandlers['maul'] = this.onMaul.bind(this);
 	this.modCommandHandlers['autobop'] = this.onAutoBop.bind(this);
 	this.modCommandHandlers['setlimit'] = this.onSongLimit.bind(this);
@@ -153,6 +154,7 @@ Bot.prototype.bindHandlers = function() {
 	this.ownerCommandHandlers['newname'] = this.onNewName.bind(this);
 	this.ownerCommandHandlers['blab'] = this.onBlab.bind(this);
 	this.ownerCommandHandlers['autome'] = this.onAuto.bind(this);
+	this.ownerCommandHandlers['afk'] = this.onSetAfk.bind(this);
 	/* Hidden Commands */
 	this.hiddenCommandHandlers['party'] = this.onBonus.bind(this);
 	this.hiddenCommandHandlers['bonus'] = this.onBonus.bind(this);
@@ -369,6 +371,18 @@ Bot.prototype.onAutoBop = function(text, number) {
 	else {
 		this.say('Will autobop the next '+numBop+' songs.')
 		autobop = numBop;
+	}
+}
+
+Bot.prototype.onSetAfk = function(text, number) {
+	var newafk = Bot.splitCommand(text)[1];
+	if (!newafk) {
+		this.say("Usage: " + Bot.splitCommand(text)[0] + " <num>");
+		return;
+	}
+	else {
+		this.say('Afk Limit is now '+newafk+' minutes.')
+		afk = newafk;
 	}
 }
 
@@ -610,7 +624,7 @@ Bot.prototype.onBoot = function(text, userid, username) {
 	var userid;
 	var subject_name = Bot.splitCommand(text)[1];
 	if (!subject_name) {
-		this.say('Usage: *boot <username>');
+		this.say('Usage: *gtfi <username>');
 	}else{
 		userid = this.useridsByName[subject_name];
 	}
@@ -1122,7 +1136,7 @@ Bot.prototype.onNewSong = function(data) {
 	var song = data.room.metadata.current_song;
 	var userid = data.room.metadata.current_dj;
 	var djstats = this.djs[userid] || (this.djs[userid] = new imports.stats.DjStats(this.users[userid]));
-	if (this.afkCheck(userid, 10) == true){ this.say('Sorry, '+djstats.user.name+' , you\'ve been afk 10 minutes, let someone else up.'); this.ttapi.remDj(userid); waskicked = true;}
+	if (this.afkCheck(userid, afk) == true){ this.say('Sorry, '+djstats.user.name+' , you\'ve been afk '+afk+' minutes, let someone else up.'); this.ttapi.remDj(userid); waskicked = true;}
 	if (songLimit > 0){
 		if( djstats.plays >= songLimit ){
 		this.say('Hey,'+djstats.user.name+', you\'ve already played '+songLimit+' songs, time for someone else to spin!'); 
