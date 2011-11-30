@@ -86,6 +86,7 @@ Bot.prototype.bindHandlers = function() {
 	this.ttapi.on('deregistered', this.onDeregister.bind(this));
 	this.ttapi.on('add_dj', this.onAddDj.bind(this));
 	this.ttapi.on('rem_dj', this.onRemDj.bind(this));
+	this.ttapi.on('endsong', this.onEndSong.bind(this));
 	this.ttapi.on('newsong', this.onNewSong.bind(this));
 	this.ttapi.on('endsong', this.onEndSong.bind(this));
 	this.ttapi.on('nosong', this.onNoSong.bind(this));
@@ -1039,6 +1040,7 @@ Bot.prototype.onAddDj = function(data) {
 	}
 	this.refreshRoomInfo();
 	var user = data.user[0];
+	this.recordActivity(user.userid);
 	this.djs[user.userid] = new imports.stats.DjStats(user);
 	if (this.djList.active) {
 		var next = this.djList.next();
@@ -1100,6 +1102,7 @@ Bot.prototype.onRemDj = function(data) {
 	}
 	this.refreshRoomInfo();
 	var user = data.user[0];
+	this.recordActivity(user.userid);
 	var stats = this.djs[user.userid];
 	if (waskicked == false){
 	if (blabber != false){
@@ -1121,7 +1124,15 @@ Bot.prototype.onRandomTest = function() {
 	var chance = Math.random();
 	if (chance > .5){ this.say('yes')}
 	else{this.say('no');}
-}
+};
+
+Bot.prototype.onSnagged = function(data) {
+	if (this.debug) {
+		console.dir(data);
+		}
+	this.recordActivity(data.userid);
+};
+
 Bot.prototype.onNewSong = function(data) {
 	if (this.debug) {
 		console.dir(data);
