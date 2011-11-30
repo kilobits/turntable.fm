@@ -617,13 +617,13 @@ Bot.prototype.onBoot = function(text, userid, username) {
 	var userid;
 	var subject_name = Bot.splitCommand(text)[1];
 	if (!subject_name) {
-		this.say('Usage: *gtfi <username>');
+		this.say('Usage: *gtfo <username>');
 	}else{
 		userid = this.useridsByName[subject_name];
 	}
 	if (userid == this.config.userid) { this.say('I won\'t boot myself, dummy.'); return;}
 	else if (userid) {
-		this.ttapi.remDj(userid);
+		this.ttapi.bootUser(userid, 'Cause I Said So.');
 	}else{this.say('No one in here by the name of '+subject_name)}
 };
 
