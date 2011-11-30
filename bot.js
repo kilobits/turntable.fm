@@ -36,7 +36,6 @@ Bot = function(configName) {
 	this.queueCommandHandlers = {};
 	this.qmodCommandHandlers = {};
 	this.greetCommandHandlers = {};
-	this.drunkCommandHandlers = {};
 	this.users = {};
 	this.useridsByName = {};
 	this.userNamesById = {};
@@ -98,7 +97,6 @@ Bot.prototype.bindHandlers = function() {
 	this.commandHandlers['plays'] = this.onPlays.bind(this);
 	this.commandHandlers['songlimit'] = this.onLimit.bind(this);
 	this.commandHandlers['fun'] = this.onFunCommands.bind(this);
-	this.commandHandlers['drunk'] = this.onDrunkCommands.bind(this);
 	this.commandHandlers['modstuff'] = this.onHelpModCommands.bind(this);
 	this.commandHandlers['bop'] = this.onBonus.bind(this);
 	this.commandHandlers['fanme'] = this.onFan.bind(this);
@@ -123,8 +121,8 @@ Bot.prototype.bindHandlers = function() {
 	this.funCommandHandlers['hug'] = this.onHug.bind(this);
 	this.funCommandHandlers['grope'] = this.onGrope.bind(this);
 	this.funCommandHandlers['smack'] = this.onSmack.bind(this);
-	this.drunkCommandHandlers['drink'] = this.onDrink.bind(this);
-	this.drunkCommandHandlers['shot'] = this.onShot.bind(this);
+	this.funCommandHandlers['drink'] = this.onDrink.bind(this);
+	this.funCommandHandlers['shot'] = this.onShot.bind(this);
 	/* Mod Commands */
 	this.modCommandHandlers['qmods'] = this.onQModCommands.bind(this);
 	this.modCommandHandlers['greetings'] = this.onGreetCommands.bind(this);
@@ -289,12 +287,6 @@ Bot.prototype.onQueueCommands = function() {
 Bot.prototype.onFunCommands = function() {
 	this.say('Fun Commands: ' +
 			Object.keys(this.funCommandHandlers)
-				.map(function(s) { return "*" + s; }).join(', '));
-};
-
-Bot.prototype.onDrunkCommands = function() {
-	this.say('Drunk Commands: ' +
-			Object.keys(this.drunkCommandHandlers)
 				.map(function(s) { return "*" + s; }).join(', '));
 };
 
