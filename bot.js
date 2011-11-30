@@ -5,7 +5,6 @@ var isOut = false;
 var theTheme = 'Dubstep/Electro';
 var blabber = true;
 var auto = false;
-var placeholder;
 var autobop = 0;
 var waskicked = false;
 var waskicked2 = false;
@@ -887,11 +886,6 @@ Bot.prototype.onRegistered = function(data) {
 	}
 	this.refreshRoomInfo();
 	user = data.user[0];
-	if (user.acl > 0) {
-		auto = false; 
-		placeholder = autobop;
-		autobop = 0;
-	}
 		if (user.userid !== this.config.userid) {
 		this.recordActivity(user.userid);
 		if (this.banList) {
@@ -998,11 +992,6 @@ Bot.prototype.refreshRoomInfo = function(cb) {
 Bot.prototype.onDeregister = function(data) {
 	if (this.debug) {
 		console.dir(data);
-	}
-	if (data.user.acl > 0) {
-		auto = true; 
-		autobop = placeholder;
-		placeholder = 0;
 	}
 	if (data.userid === this.config.userid) {
 		this.roomInfo = null;
