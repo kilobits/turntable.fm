@@ -238,7 +238,7 @@ Bot.prototype.onSpeak = function(data) {
 	if (Bot.theOwners.indexOf(data.userid) !== -1) {
 		handler = handler || this.ownerCommandHandlers[command] || this.modCommandHandlers[command] || this.qmodCommandHandlers[command] || this.greetCommandHandlers[command];
 	}
-	handler = handler || this.commandHandlers[command] || this.funCommandHandlers[command] || this.drunkCommandHandlers[command] || this.moreCommandHandlers[command] || this.queueCommandHandlers[command] || this.hiddenCommandHandlers[command];
+	handler = handler || this.commandHandlers[command] || this.funCommandHandlers[command] || this.moreCommandHandlers[command] || this.queueCommandHandlers[command] || this.hiddenCommandHandlers[command];
 	if (handler) {
 		handler.call(this, data.text, data.userid, data.name);
 	}
