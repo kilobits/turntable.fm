@@ -85,9 +85,8 @@ Bot.prototype.bindHandlers = function() {
 	this.ttapi.on('deregistered', this.onDeregister.bind(this));
 	this.ttapi.on('add_dj', this.onAddDj.bind(this));
 	this.ttapi.on('rem_dj', this.onRemDj.bind(this));
-	this.ttapi.on('endsong', this.onEndSong.bind(this));
 	this.ttapi.on('newsong', this.onNewSong.bind(this));
-	this.ttapi.on('endsong', this.onEndSong.bind(this));
+	//this.ttapi.on('endsong', this.onEndSong.bind(this));
 	this.ttapi.on('nosong', this.onNoSong.bind(this));
 	this.ttapi.on('update_votes', this.onUpdateVotes.bind(this));
 	/* User Commands */
@@ -1143,7 +1142,7 @@ Bot.prototype.onNewSong = function(data) {
 	if (autobop > 0 && isOut != true) {this.ttapi.vote('up'); autobop--;}
 };
 
-Bot.prototype.onEndSong = function() {
+/*Bot.prototype.onEndSong = function() {
 	if (this.currentSong && this.currentSong.song && this.currentSong.dj) {
 		var message = this.config.messages.songSummary;
 		this.say(message
@@ -1154,7 +1153,7 @@ Bot.prototype.onEndSong = function() {
 			.replace(/\{artist\}/g, this.currentSong.song.metadata.artist)
 			.replace(/\{album\}/g, this.currentSong.song.metadata.album));
 	}
-};
+};*/
 
 Bot.prototype.onUpdateVotes = function(data) {
 	if (this.debug) {
