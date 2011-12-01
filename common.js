@@ -1,13 +1,18 @@
 exports.conf = {
-	"auth": "USERAUTH",
-	"userid": "USERID",
-	"roomid": "TTROOMID",
+	"auth": "auth+live+yourauth",
+	"userid": "youruserid",
+	"roomid": "yourroomid",
 	"greetings_filename": "greetings.json",
 	"pending_greetings_filename": "greetings-pending.json",
 	"activity_filename": "activity.json",
 	"usernames_filename": "usernames.json",
 	"djlist_filename": "djlist-{roomid}.json",
 	"banlist_filename": "banlist-{roomid}.json",
+    "owners": {
+        "4e0ff328a3f751670a084ba6":"YayRamen!",
+        "4e9a7d20a3f7515e6508de50":"Dj NastyBits",
+        "4e619cc9a3f7514df80f739c":"ZmbeePrncess"
+    },
 	"messages": {
 		"help": "The theme is {theme}, {queue}, {limit}.",
 		"defaultGreetings": [

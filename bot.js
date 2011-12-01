@@ -68,7 +68,7 @@ Bot.prototype.onInitConfig = function (cb, err) {
     this.readUsernames();
     this.ttapi = new imports.ttapi(this.config.auth, this.config.userid, this.config.roomid);
     this.bindHandlers();
-    if (cb) {#A91414
+    if (cb) {
         cb();
     }
 };
@@ -230,7 +230,7 @@ Bot.prototype.onSpeak = function (data) {
     if (this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) !== -1) {
         handler = handler || this.modCommandHandlers[command] || this.qmodCommandHandlers[command] || this.greetCommandHandlers[command];
     }
-    if (Bot.theOwners.indexOf(data.userid) !== -1) {
+    if (this.config.owners[data.userid]) {
         handler = handler || this.ownerCommandHandlers[command] || this.modCommandHandlers[command] || this.qmodCommandHandlers[command] || this.greetCommandHandlers[command];
     }
     handler = handler || this.commandHandlers[command] || this.funCommandHandlers[command] || this.moreCommandHandlers[command] || this.queueCommandHandlers[command] || this.hiddenCommandHandlers[command];
@@ -1180,7 +1180,7 @@ Bot.prototype.onNewSong = function (data) {
     }
     djstats.play(song);
     this.currentSong = new imports.stats.SongStats(song, this.users[song.djid]);
-    if (auto == true && userid == "4e0ff328a3f751670a084ba6") {
+    if (auto == true && this.config.owners[userid]) {
         this.ttapi.vote('up');
     };
     if (autobop > 0 && isOut != true) {
@@ -1221,7 +1221,6 @@ Bot.prototype.onNoSong = function (data) {
     this.currentSong = null;
 };
 
-Bot.theOwners = ['4e0ff328a3f751670a084ba6', '4e9a7d20a3f7515e6508de50', '4e619cc9a3f7514df80f739c'];
 Bot.bareCommands = ['help', 'theme', 'q', 'q+', 'q-'];
 
 Bot.prototype.recordActivity = function (userid) {
