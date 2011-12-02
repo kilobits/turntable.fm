@@ -41,6 +41,7 @@ Bot = function (configName) {
     this.djs = {}; /** @type SongStats */
     this.currentSong = null;
     this.pendingGreetings = {};
+    this.rooms = {};
     this.greetings = {};
     this.activity = {};
     this.djList = new imports.djlist.DjList();
@@ -66,6 +67,7 @@ Bot.prototype.onInitConfig = function (cb, err) {
     this.readGreetings();
     this.readActivity();
     this.readUsernames();
+    this.readRooms();
     this.ttapi = new imports.ttapi(this.config.auth, this.config.userid, this.config.roomid);
     this.bindHandlers();
     if (cb) {
@@ -151,6 +153,7 @@ Bot.prototype.bindHandlers = function () {
     /* Owner Commands */
     this.ownerCommandHandlers['firedrill'] = this.onDrill.bind(this);
     this.ownerCommandHandlers['go'] = this.onGo.bind(this);
+    this.ownerCommandHandlers['setgo'] = this.onSetGo.bind(this);
     this.ownerCommandHandlers['newname'] = this.onNewName.bind(this);
     this.ownerCommandHandlers['blab'] = this.onBlab.bind(this);
     this.ownerCommandHandlers['autome'] = this.onAuto.bind(this);
@@ -169,6 +172,13 @@ Bot.prototype.readGreetings = function () {
     }.bind(this));
 };
 
+Bot.prototype.readRooms = function () {
+    imports.Store.read(this.config.rooms_filename, function (data) {
+        this.rooms = data;
+        console.log('loaded %d rooms', Object.keys(this.rooms).length);
+    }.bind(this));
+};
+
 Bot.prototype.readActivity = function () {
     imports.Store.read(this.config.activity_filename, function (data) {
         this.activity = data;
@@ -184,6 +194,10 @@ Bot.prototype.writeActivity = function () {
 
 Bot.prototype.writeGreetings = function () {
     imports.Store.write(this.config.greetings_filename, this.greetings, console.log.bind(this, 'saved %d greetings to %s', Object.keys(this.greetings).length, this.config.greetings_filename));
+};
+
+Bot.prototype.writeRooms = function () {
+    imports.Store.write(this.config.rooms_filename, this.rooms, console.log.bind(this, 'saved %d rooms to %s', Object.keys(this.rooms).length, this.config._filename));
 };
 
 Bot.prototype.writePendingGreetings = function () {
@@ -573,21 +587,32 @@ Bot.prototype.onGo = function (text, room) {
         this.say("Usage: " + Bot.splitCommand(text)[0] + " <room name/id>");
         return;
     }
-    if (room_name == "zmbeeparty") {
-        room = '4ebb3f7167db4632ad1335a1';
+    if (room_name in this.rooms )  {
+        room = this.rooms[room_name];
+        this.say('Going to '+room_name);
+    }  else {
+        this.say('Leaving Now!');
     }
-    if (room_name == "bots") {
-        room = '4ec345804fe7d0727a0020a3';
-    }
-    if (room_name == "alphabeats") {
-        room = '4e5582db14169c5e62324d64';
-    }
-    if (room_name == "metime") {
-        room = '4ec8aa2414169c121e1d1702';
-    }
-    this.say('Leaving Now!');
     this.ttapi.roomRegister(room);
 };
+
+Bot.prototype.onSetGo = function (text, userid, username) {
+    var args = Bot.splitCommand(text)[1];
+    if (!args) {
+        this.say("Usage: " + Bot.splitCommand(text)[0] + " <roomname>,<roomid>");
+        return;
+    }
+    var split = args.split(/,(.+)/);
+    var roomid = split[0];
+    var roomname = split[1] ;
+    if (!roomid || !roomname) {
+        return;
+    }
+    this.rooms[roomid] = roomname;
+    this.writeRooms();
+    this.say("It is Written.");
+};
+
 
 Bot.prototype.onSetTheme = function (text, theme) {
     var newTheme = Bot.splitCommand(text)[1];

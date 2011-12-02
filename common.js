@@ -1,10 +1,11 @@
 exports.conf = {
 	"auth": "auth+live+yourauth",
-	"userid": "youruserid",
-	"roomid": "yourroomid",
+	"userid": "userid",
+	"roomid": "roomid",
 	"greetings_filename": "greetings.json",
 	"pending_greetings_filename": "greetings-pending.json",
 	"activity_filename": "activity.json",
+    "rooms_filename": "rooms.json",
 	"usernames_filename": "usernames.json",
 	"djlist_filename": "djlist-{roomid}.json",
 	"banlist_filename": "banlist-{roomid}.json",
