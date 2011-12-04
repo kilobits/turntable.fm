@@ -106,8 +106,7 @@ Bot.prototype.bindHandlers = function () {
     this.commandHandlers['fanme'] = this.onFan.bind(this);
     this.commandHandlers['stagedive'] = this.onstageDive.bind(this)
     this.commandHandlers['more'] = this.onMoreCommands.bind(this);
-    this.moreCommandHandlers['cmd'] = this.onAllCommands.bind(this);
-    this.moreCommandHandlers['cmds'] = this.onAllCommands.bind(this);
+    this.moreCommandHandlers['afkcheck'] = this.onAfkCheck.bind(this);
     this.moreCommandHandlers['unfanme'] = this.onUnfan.bind(this);
     this.moreCommandHandlers['album'] = this.onAlbum.bind(this);
     this.moreCommandHandlers['last'] = this.onLast.bind(this);
@@ -161,6 +160,7 @@ Bot.prototype.bindHandlers = function () {
     /* Hidden Commands */
     this.hiddenCommandHandlers['party'] = this.onBonus.bind(this);
     this.hiddenCommandHandlers['bonus'] = this.onBonus.bind(this);
+    this.hiddenCommandHandlers['freakthefuckout'] = this.onBonus.bind(this);
 
 
 };
@@ -386,6 +386,16 @@ Bot.prototype.onSetAfk = function (text, number) {
         afk = newafk;
     }
 }
+
+Bot.prototype.onAfkCheck = function() {
+    this.refreshRoomInfo();
+    var thisdjs = this.roomInfo.room.metadata.djs;
+    if (this.afkCheck(thisdjs[0], afk) == true) { this.ttapi.remDj(thisdjs[0]); };
+    if (this.afkCheck(thisdjs[1], afk) == true) { this.ttapi.remDj(thisdjs[1]); };
+    if (this.afkCheck(thisdjs[2], afk) == true) { this.ttapi.remDj(thisdjs[2]); };
+    if (this.afkCheck(thisdjs[3], afk) == true) { this.ttapi.remDj(thisdjs[3]); };
+    if (this.afkCheck(thisdjs[4], afk) == true) { this.ttapi.remDj(thisdjs[4]); };
+};
 
 Bot.prototype.onSongLimit = function (text, number) {
     var sLimit = Bot.splitCommand(text)[1];

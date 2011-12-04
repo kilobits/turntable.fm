@@ -1,7 +1,7 @@
 #My Version of Vin's bot.
 
 #How To Use
-##First, Get Vin's code. Get it up and running. Once you have confirmed that Vin's bot works, come back and copy over my two files and replace those from Vin's code. That is all it takes to get this fork.
+##First, Get Vin's code. Get it up and running. Once you have confirmed that Vin's bot works, come back and copy over my files and replace those from Vin's code. That is all it takes to get this fork.
 
 ## Commands I've Added/Changed
 
