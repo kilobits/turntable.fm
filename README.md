@@ -6,8 +6,8 @@ It runs on [node.js](http://nodejs.org/), usings Alain Gilbert's
 
 ## Setting Up
 
-Since my bot is based off of Vin's code, you'll need to set up his
-code first. So head on over to his repo, and get it set up.
+Since my bot is based off of [Vin's code](https://github.com/vin/turntable.fm), you'll need to set up his
+code first. So head on over to his [repo](https://github.com/vin/turntable.fm), and get it set up.
 
 Once you have Vin's code up and running, you can just come back
 here and copy my files in and replace those that you already have. Easy.
@@ -24,7 +24,7 @@ still want it. Also added maul and gtfo, the remove dj and boot commands.
 
 ## Definitions
 
-`autobop` - Sets the bot to autobop (technically illegal) Useage: *autobop <num/left/clear>
+`autobop` - Sets the bot to autobop (technically illegal) Useage: *autobop {num/left/clear}
 [*autobop 6] will set bot to autobop for the next 6 songs, [*autobop left] will tell you how many 
 more song the bot will bop, and [*autobop clear] will set autobop to 0, thus clearing the autobop.
 
