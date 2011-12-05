@@ -701,12 +701,17 @@ Bot.prototype.onBan = function(text, userid, username) {
   var comment = split[1] || "";
   var subjectid = this.useridsByName[subject_name];
   if (!subjectid) { return; }
+   if (subjectid == this.config.userid) {
+        this.say('I won\'t ban myself, dummy.');
+        return;
+    }
   this.banList.ban(subjectid, comment + " -- " + username + " " + new Date());
   this.banList.save(this.config.banlist_filename);
   this.say(this.config.messages.ban
       .replace(/\{user\.name\}/g, subject_name)
       .replace(/\{banner\.name\}/g, username)
       .replace(/\{ban\.comment\}/g, comment));
+  this.ttapi.bootUser(subjectid, comment);
 };
 
 Bot.prototype.onBans = function(text, userid, username) {
