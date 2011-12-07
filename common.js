@@ -45,12 +45,12 @@ exports.conf = {
 		"lastActivity": "It's been {age} since I saw {user.name}",
 		"lastActivityUnknown": "Hmm, I haven't seen {user.name}",
 		"listInactive": "There is no list.  Fastest-fingers.",
-		"listEmpty": "Nobody's on the list.  Type *addme to add yourself.",
+		"listEmpty": "Nobody's on the list.  Type q+ to add yourself.",
 		"listAdded": "{user.name}, you're now #{position} on the list.",
 		"list": "The current dj list is: {list}",
-		"listOn": "The room now has a dj list.  Type *addme to add yourself.",
+		"listOn": "The room now has a dj list.  Type q+ to add yourself.",
 		"listOff": "The dj list is now off.  Fastest-fingers.",
-		"listAlreadyOn": "The dj list is already on.  Type *list to see the current list.",
+		"listAlreadyOn": "The dj list is already on.  Type q to see the current list.",
 		"listAlreadyOff": "The dj list is already off.  Fastest-fingers.",
 		"listAlreadyListed": "{user.name} is already #{position} on the list.",
 		"listRemoved": "{user.name} has been removed from the DJ list.",
@@ -67,6 +67,7 @@ exports.conf = {
 		"greetingRejected": "Greeting for {user.name} removed.",
 		"pendingGreetingRejected": "Pending greeting for {user.name} rejected.",
 		"noGreeting": "{user.name} doesn't have a personal greeting",
-		"pendingGreetings": "Users with proposed greetings pending moderator approval: {list}"
+		"pendingGreetings": "Users with proposed greetings pending moderator approval: {list}",
+        "unknownUser": "Who is {user.name}?"
 	}
 };
