@@ -31,6 +31,7 @@ Bot = function(configName) {
   this.qCommandHandlers = {};
   this.greetCommandHandlers = {};
   this.qmodCommandHandlers = {};
+  this.shyCommandHandlers = {};
   this.users = {};
   this.useridsByName = {};
   this.usernamesById = {};
@@ -93,7 +94,6 @@ Bot.prototype.bindHandlers = function() {
   this.commandHandlers['commands'] = this.onHelpCommands;
   this.commandHandlers['modstuff'] = this.onHelpFriendCommands;
   this.commandHandlers['all'] = this.onAllCommands;
-  this.commandHandlers['bop'] = this.onBonus;
   this.commandHandlers['album'] = this.onAlbum;
   this.commandHandlers['last'] = this.onLast;   
   this.commandHandlers['songlimit'] = this.onLimit;
@@ -101,6 +101,7 @@ Bot.prototype.bindHandlers = function() {
   this.commandHandlers['plays'] = this.onPlays;
   this.commandHandlers['greet'] = this.onGreet;
   this.commandHandlers['queue'] = this.onQueueCommands;
+  this.commandHandlers['stagedive'] = this.onstageDive;
   
   this.qCommandHandlers['q+'] = this.onAddme;
   this.qCommandHandlers['q-'] = this.onRemoveme;
@@ -126,6 +127,7 @@ Bot.prototype.bindHandlers = function() {
   
   this.friendCommandHandlers['maul'] = this.onMaul;
   this.friendCommandHandlers['gtfo'] = this.onBoot;
+  this.friendCommandHandlers['bop'] = this.onBonus;
   this.friendCommandHandlers['settheme'] = this.onSetTheme;
   this.friendCommandHandlers['autobop'] = this.onAutoBop;
   this.friendCommandHandlers['setlimit'] = this.onSongLimit;
@@ -138,9 +140,8 @@ Bot.prototype.bindHandlers = function() {
   this.ownerCommandHandlers['autome'] = this.onAuto;
   this.ownerCommandHandlers['blab'] = this.onBlab;
  
-  this.hiddenCommandHandlers['bonys'] = this.onBonus;
-  this.hiddenCommandHandlers['bonus'] = this.onBonus;
   this.hiddenCommandHandlers['freakthefuckout'] = this.onBonus;
+  this.shyCommandHandlers['bonus'] = this.onBonus;
 
 };
 
@@ -231,6 +232,7 @@ Bot.prototype.onSpeak = function(data) {
     handler = handler || this.banCommandHandlers[command];
     handler = handler || this.greetCommandHandlers[command];
     handler = handler || this.qmodCommandHandlers[command];
+    handler = handler || this.shyCommandHandlers[command];
   }
   handler = handler || this.commandHandlers[command];
   handler = handler || this.hiddenCommandHandlers[command];
@@ -1010,14 +1012,11 @@ Bot.prototype.onAddDj = function(data) {
         }
 };
 
-Bot.prototype.djSummary = function(stats) {
-  var message = randomElement(this.config.messages.djSummaries);
-  return message
-      .replace(/\{user\.name\}/g, stats.user.name)
-      .replace(/\{user\.points\}/g, stats.user.points)
-      .replace(/\{lames\}/g, stats.lames)
-      .replace(/\{gain\}/g, stats.gain)
-      .replace(/\{plays\}/g, stats.plays);
+Bot.prototype.djSummary = function (stats) {
+    var message = randomElement(this.config.messages.djSummaries);
+    if (stats.plays != 0) {
+        return message.replace(/\{user\.name\}/g, stats.user.name).replace(/\{user\.points\}/g, stats.user.points).replace(/\{lames\}/g, stats.lames).replace(/\{gain\}/g, stats.gain).replace(/\{plays\}/g, stats.plays);
+    }
 };
 
 Bot.prototype.onRemDj = function(data) {
@@ -1053,6 +1052,7 @@ Bot.prototype.onSnagged = function(data) {
     console.dir(data);
   }
   this.recordActivity(data.userid);
+  this.ttapi.vote('up');
 };
 
 Bot.prototype.onNewSong = function(data) {
