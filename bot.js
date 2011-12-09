@@ -1060,6 +1060,12 @@ Bot.prototype.onSnagged = function(data) {
   this.ttapi.vote('up');
 };
 
+Bot.prototype.onEndSong = function() {
+  if (this.currentSong && this.currentSong.song && this.currentSong.dj) {
+       this.currentSong = null;
+  }
+};
+
 Bot.prototype.onNewSong = function(data) {
   if (this.debug) {
     console.dir(data);
@@ -1068,7 +1074,7 @@ Bot.prototype.onNewSong = function(data) {
   var userid = data.room.metadata.current_dj;
   var djstats = this.djs[userid] || (this.djs[userid] = new imports.stats.DjStats(this.users[userid]));
   djstats.play(song);
-  this.currentSong = new imports.stats.SongStats(song, this.users[song.djid]);
+  this.currentSong = new imports.stats.SongStats(song, this.users[userid]);
       if (songLimit > 0) {
         if (djstats.plays >= songLimit) {
             this.say('Hey,' + djstats.user.name + ', you\'ve already played ' + songLimit + ' songs, time for someone else to spin!');
