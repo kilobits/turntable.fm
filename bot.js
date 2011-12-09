@@ -141,6 +141,7 @@ Bot.prototype.bindHandlers = function() {
   this.ownerCommandHandlers['blab'] = this.onBlab;
  
   this.hiddenCommandHandlers['freakthefuckout'] = this.onBonus;
+  this.hiddenCommandHandlers['moo'] = this.onMoo;
   this.shyCommandHandlers['bonus'] = this.onBonus;
 
 };
@@ -400,6 +401,10 @@ Bot.prototype.onBoot = function (text, userid, username) {
     } else {
         this.say('No one in here by the name of ' + subject_name)
     }
+};
+
+Bot.prototype.onMoo = function() {
+   this.say('I\'m not a cow, but okaMOOOOOOOO.') 
 };
 /*------------------------------ End Custom, Non-Vin Code ------------------------------*/
 
