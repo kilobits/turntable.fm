@@ -917,10 +917,15 @@ Bot.prototype.onRoomInfo = function(data) {
     if (!this.currentSong) {
       this.currentSong = new imports.stats.SongStats(
           data.room.metadata.current_song,
-          this.users[data.room.metadata.current_dj]);
+          this.currentDj(data));
       this.currentSong.updateVotes(data.room.metadata);
     }
   }
+};
+
+Bot.prototype.currentDj = function(optional_roomInfo) {
+  var roomInfo = optional_roomInfo || this.roomInfo;
+  return this.users[roomInfo.room.metadata.current_dj];
 };
 
 /** @param {RoomInfo} data */
@@ -1084,16 +1089,40 @@ Bot.prototype.onNewSong = function(data) {
     }
 };
 
+Bot.prototype.milestoneMessage = function(points) {
+  var message = this.config.messages.milestones[points];
+  if (points % 1000 == 0) {
+    message = message || this.config.messages.milestones['thousand'];
+  }
+  if (points % 100 == 0) {
+    message = message || this.config.messages.milestones['hundred'];
+  }
+  return message;
+};
+
+Bot.prototype.checkMilestone = function() {
+  if (!this.currentDj()) {
+    return;
+  }
+  var points = this.currentDj().points;
+  var message = this.milestoneMessage(points);
+  if (message) {
+    this.say(message
+	.replace(/\{user\.name\}/g, this.currentSong.dj.name)
+	.replace(/\{points\}/g, points));
+  }
+};
+
 Bot.prototype.onUpdateVotes = function(data) {
   if (this.debug) {
     console.dir(data);
   }
   this.recordActivity(data.room.metadata.votelog[0][0]);
   if (this.currentSong) {
-    this.currentSong.updateVotes(data.room.metadata);
-  } else {
-    this.refreshRoomInfo();
+      this.currentSong.dj = this.currentDj();
+      this.currentSong.updateVotes(data.room.metadata);
   }
+  this.refreshRoomInfo(this.checkMilestone);
 };
 
 Bot.prototype.onNoSong = function(data) {
