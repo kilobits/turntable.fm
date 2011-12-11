@@ -71,7 +71,7 @@ exports.conf = {
         "unknownUser": "Who is {user.name}?",
         "milestones": {
             "hundred": "{user.name} just reached {points} points. Nice!",
-            "thousand": "Congrats on, reaching {points}, {user.name}!",
+            "thousand": "Congrats on,reaching {points}, {user.name}!",
             "100": "{user.name} just reached {points} points. Bear up!",
             "300": "{user.name} just reached {points} points. Try on a cat suit!",
             "600": "{user.name} just reached {points} points. Moosehead!",
