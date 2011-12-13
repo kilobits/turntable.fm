@@ -223,12 +223,21 @@ Bot.prototype.onSpeak = function (data) {
   if (this.config.owners[data.userid]) {
     handler = handler || this.ownerCommandHandlers[command];
     handler = handler || this.friendCommandHandlers[command];
+    handler = handler || this.greetCommandHandlers[command];
+    handler = handler || this.banCommandHandlers[command];
+    handler = handler || this.qmodCommandHandlers[command];
+    handler = handler || this.shyCommandHandlers[command];
   }
-  if (this.config.friends[data.userid]) {
+  if (this.config.friends[data.userid] || this.roomInfo.room.metadata.moderator_id.indexOf(data.userid) !== -1) {
     handler = handler || this.friendCommandHandlers[command];
+    handler = handler || this.greetCommandHandlers[command];
+    handler = handler || this.banCommandHandlers[command];
+    handler = handler || this.qmodCommandHandlers[command];
+    handler = handler || this.shyCommandHandlers[command];
   }
   handler = handler || this.commandHandlers[command];
   handler = handler || this.hiddenCommandHandlers[command];
+  handler = handler || this.qCommandHandlers[command];
   if (handler) {
     handler.call(this, data.text, data.userid, data.name);
   }
@@ -270,7 +279,7 @@ Bot.prototype.onstageDive = function (text, userid, username) {
 
 Bot.prototype.djDive = function (stats) {
   var message = '{user.name} is surfing the crowd, having earned {gain} points off of {plays} songs!'
-  var message2 = '{user.name} tried to surf the crowd, but he ended up knocking his laptop over.'
+  var message2 = '{user.name} tried to surf the crowd, but they ended up knocking their laptop over.'
   if (stats.plays != 0) {
     return message.replace(/\{user\.name\}/g, stats.user.name).replace(/\{gain\}/g, stats.gain).replace(/\{plays\}/g, stats.plays);
   }
@@ -412,8 +421,16 @@ Bot.prototype.onBoot = function (text, userid, username) {
     this.say('I won\'t boot myself, dummy.');
     return;
   }
+  else if (this.config.owners[userid]) {
+    this.say("I won't boot "+subject_name+" cause I lurvs them.");
+    return;
+  }
   else if (userid) {
     this.ttapi.bootUser(userid, 'Cause I Said So.');
+  }
+  else if (this.config.owners[userid]) {
+    this.say("I won't boot "+subject_name+" cause I lurvs them.");
+    return;
   }
   else {
     this.say('No one in here by the name of ' + subject_name)
