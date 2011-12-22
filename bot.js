@@ -405,6 +405,7 @@ Bot.prototype.onMaul = function (text, userid, username) {
   }
   if (userid) {
     this.ttapi.remDj(userid);
+    this.say('Rawr!')
   }
 };
 
