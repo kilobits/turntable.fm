@@ -7,6 +7,8 @@ var autobop = 0;
 var songLimit = 0;
 var afk = 10;
 var theTheme;
+var bac = 0;
+var isOut = false;
 
 var imports = {
   repl: require('repl'),
@@ -109,6 +111,8 @@ Bot.prototype.bindHandlers = function () {
   this.commandHandlers['greet'] = this.onGreet;
   this.commandHandlers['queue'] = this.onQueueCommands;
   this.commandHandlers['stagedive'] = this.onstageDive;
+  this.commandHandlers['drink'] = this.onDrink;
+  this.commandHandlers['shot'] = this.onShot;
 
   this.qCommandHandlers['q+'] = this.onAddme;
   this.qCommandHandlers['q-'] = this.onRemoveme;
@@ -258,6 +262,47 @@ Bot.prototype.onSpeak = function (data) {
   }
 };
 ////////////////////////////////////////////Start Custom Code
+
+Bot.prototype.onDrink = function (text, userid, username) {
+    if (isOut == true) {
+        this.say('/me is passed out.');
+        return;
+    } 
+    if (bac <15) {
+        this.say('/me drinks');
+        bac++;
+        this.say(this.drunk(bac));
+    } else  {
+        this.say(this.drunk(bac));
+            this.say('/me passes out');
+            setTimeout(function () {
+                isOut = false;
+            }, 180000);
+            isOut = true;
+            bac = 0;
+        }
+};
+
+Bot.prototype.onShot = function (text, userid, username) {
+    if (isOut == true) {
+        this.say('/me is passed out.');
+        return;
+    } 
+    if (bac <15) {
+        this.say('/me takes a shot.');
+        bac++;
+        this.say(this.drunk(bac));
+        bac++;
+    } else  {
+        this.say(this.drunk(bac));
+            this.say('/me passes out');
+            setTimeout(function () {
+                isOut = false;
+            }, 180000);
+            isOut = true;
+            bac = 0;
+        }
+};
 Bot.prototype.onBlab = function () {
   if (blabber != false) {
     blabber = false;
@@ -486,6 +531,25 @@ Bot.prototype.onBoot = function (text, userid, username) {
 Bot.prototype.onMoo = function () {
   this.say('I\'m not a cow, but okaMOOOOOOOO.')
 };
+
+Bot.prototype.drunk = function (num) {
+  var message;
+  var drinks = num;
+  if(drinks == 0) {
+    message = randomElement(this.config.messages.sober);
+  } else if (drinks == 1) {
+      message = randomElement(this.config.messages.onedrink);
+  } else if (drinks > 1  && drinks < 5) {
+      message = randomElement(this.config.messages.buzzed);
+  } else if (drinks >= 5 && drinks < 10) {
+      message = randomElement(this.config.messages.drunk);
+  } else if (drinks >= 10 && drinks < 15) {
+      message = randomElement(this.config.messages.wasted);
+  } else if (drinks > 15) {
+      message = randomElement(this.config.messages.passedout);
+  }
+  return message;
+};
 /////////////////////////////////////////////////////End Custom Code
 /////////////////////////////////////////////////////Change Help
 Bot.prototype.onHelp = function () {
@@ -569,7 +633,11 @@ Bot.prototype.onBonus = function (text, userid, username) {
   if (!this.currentSong || !this.currentSong.song) {
     return;
   }
-  this.ttapi.vote('up');
+    if (isOut != true) {
+        this.ttapi.vote('up');
+    } else {
+        this.say('/me can\'t bop while passed out.')
+    }
 };
 
 Bot.prototype.onAlbum = function () {
@@ -1139,7 +1207,7 @@ Bot.prototype.onNewSong = function (data) {
   if (auto == true && this.config.owners[userid]) {
     this.ttapi.vote('up');
   };
-  if (autobop > 0) {
+  if (autobop > 0 && isOut != true) {
     this.ttapi.vote('up');
     autobop--;
   }

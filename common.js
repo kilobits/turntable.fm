@@ -35,6 +35,46 @@ exports.conf = {
 			"{user.name} played {plays} songs, gaining {gain} points (and got lamed {lames} times).",
 			"Thanks for the tunes {user.name}.  You played {plays} songs and got {gain} points and {lames} lames."
 		],
+        "sober": [
+			"I've never been one to turn down a free drink.",
+			"It's only a drink, what can happen?",
+            "I do love me some alcohol",
+            "See you tomorrow!!!"
+		],
+        "onedrink": [
+			"I've only had one, what's one more?",
+			"Thank you, now can I have one more?",
+            "Man, this is going to be a good night."
+		],
+        "buzzed": [
+			"And how are YOU doing? ;D",
+			"I see me some booty up in herr.",
+            "No, man, I'm not drunk.",
+            "I'm actually good to drive,  gimme mah keys back.",
+            "I have this really funny joke, I just can't remember it.",
+		],
+        "drunk": [
+			"/me stumbles",
+			"I just don't understand why they left me...I was so good to them...",
+            "/me that chick over there is hot. I'ma go get slapped by a boyfriend, brb.",
+            "I'm not as think as you drunk I am.",
+            "No, I TOLD you, I drive better drunk.",
+            "/me walks into pole.",
+            "/me runs off to the bathroom."
+		],
+        "wasted": [
+			"/me takes off shirt.",
+            "I'd shag me, that's all I'm saying. You're missing out.",
+            "Come on, lovely! You beling with meeeeee.",
+            "/me throws up.",
+            "I'm never drinking again, damn.",
+            "/me falls over."
+		],
+        "passedout": [
+			"This is the bathroom, right?",
+			"/me falls over",
+            "/me trips over a shadow"
+		],
         "theme": "Dubstep/Electro",
 		"plays": "{user.name} has played {plays} songs.",
 		"newModerator": "{user.name} is now a moderator in {room.name}.  With great power comes great responsibility.",
