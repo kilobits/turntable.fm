@@ -962,8 +962,12 @@ Bot.prototype.onPendingGreetings = function (text, userid, username) {
 Bot.prototype.onRegistered = function (data) {
   if (this.debug) {
     console.dir(data);
-  }
-  user = data.user[0];
+}
+user = data.user[0];
+////////////////////////////////////Blab
+if (blabber != false && this.afkCheck(user.userid, 5) == true) {
+    this.say(this.greeting(user));
+}
   if (user.userid !== this.config.userid) {
     this.recordActivity(user.userid);
     this.refreshRoomInfo();
@@ -974,10 +978,6 @@ Bot.prototype.onRegistered = function (data) {
         this.ttapi.bootUser(user.userid, banned_reason);
         return;
       }
-    }
-    ////////////////////////////////////Blab
-    if (blabber != false) {
-      this.say(this.greeting(user));
     }
   }
 };
