@@ -1231,6 +1231,10 @@ Bot.prototype.onNewSong = function (data) {
     this.ttapi.vote('up');
     autobop--;
   }
+  /////////////Sober Up
+  if (bac > 0) {
+    bac--;
+  }
 };
 
 Bot.prototype.onEndSong = function () {
