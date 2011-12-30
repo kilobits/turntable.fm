@@ -137,6 +137,7 @@ Bot.prototype.bindHandlers = function () {
   this.greetCommandHandlers['pending-greetings'] = this.onPendingGreetings;
 
   this.friendCommandHandlers['maul'] = this.onMaul;
+  this.friendCommandHandlers['firedrill'] = this.onDrill;
   this.friendCommandHandlers['gtfo'] = this.onBoot;
   this.friendCommandHandlers['bop'] = this.onBonus;
   this.friendCommandHandlers['settheme'] = this.onSetTheme;
@@ -481,7 +482,16 @@ Bot.prototype.onMaul = function (text, userid, username) {
   if (!subject_name) {
     this.say('Usage: *maul <username>');
   }
-  else if (subject_name == "everyone") {
+    else {
+    userid = this.useridsByName[subject_name];
+  }
+  if (userid) {
+    this.ttapi.remDj(userid);
+    this.say('Rawr!');
+  }
+};
+
+Bot.prototype.onDrill = function (text, userid, username) {
     this.refreshRoomInfo();
     var thisdjs = this.roomInfo.room.metadata.djs
     this.ttapi.remDj(thisdjs[0]);
@@ -489,14 +499,6 @@ Bot.prototype.onMaul = function (text, userid, username) {
     this.ttapi.remDj(thisdjs[2]);
     this.ttapi.remDj(thisdjs[3]);
     this.ttapi.remDj(thisdjs[4]);
-  }
-  else {
-    userid = this.useridsByName[subject_name];
-  }
-  if (userid) {
-    this.ttapi.remDj(userid);
-    this.say('Rawr!');
-  }
 };
 
 Bot.prototype.onBoot = function (text, userid, username) {
