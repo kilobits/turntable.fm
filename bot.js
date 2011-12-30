@@ -9,6 +9,7 @@ var afk = 10;
 var theTheme;
 var bac = 0;
 var isOut = false;
+var shuffle = false;
 
 var imports = {
   repl: require('repl'),
@@ -153,6 +154,7 @@ Bot.prototype.bindHandlers = function () {
   this.ownerCommandHandlers['blab'] = this.onBlab;
   this.ownerCommandHandlers['go'] = this.onGo;
   this.ownerCommandHandlers['setgo'] = this.onSetGo;
+  this.ownerCommandHandlers['shuffle'] = this.onShuffle;
 
   this.hiddenCommandHandlers['freakthefuckout'] = this.onBonus;
   this.hiddenCommandHandlers['moo'] = this.onMoo;
@@ -387,6 +389,17 @@ Bot.prototype.onAuto = function () {
   else if (auto != true) {
     auto = true;
     this.say('I bop now.')
+  }
+};
+
+Bot.prototype.onShuffle = function () {
+  if (shuffle != false) {
+    shuffle = false;
+    this.say('Shuffle Mode is Deactivated')
+  }
+  else if (shuffle != true) {
+    shuffle = true;
+    this.say('Shuffle Mode is Activated')
   }
 };
 
@@ -1205,6 +1218,11 @@ Bot.prototype.onNewSong = function (data) {
       }
     }
   }
+  /////////////Shuffle / Musical Chairs
+  if (shuffle == true) {
+      var unlucky = randomElement(this.roomInfo.room.metadata.djs);
+      this.ttapi.remDj(unlucky);
+    }
   /////////////AutoOwner && Autobop
   if (auto == true && this.config.owners[userid]) {
     this.ttapi.vote('up');
