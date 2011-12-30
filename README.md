@@ -12,19 +12,9 @@ code first. So head on over to his [repo](https://github.com/vin/turntable.fm), 
 Once you have Vin's code up and running, you can just come back  
 here and copy my files in and replace those that you already have. Easy.  
 
-## Changes
-
-I just rewrote the bot. I got the latest revision of [Vin's code](https://github.com/vin/turntable.fm), and set it up,  
-and then recoded some functions in. I think it's a bit more stable now.  
-
-`12.4.11` - Main Rewrite. Added autobop, song limit, blabber, sorted  
-out the commands, changed the queue commands, added the themes  
-added my own afk checks. Renamed the old bot 'oldbot' in case people  
-still want it. Also added maul and gtfo, the remove dj and boot commands.  
-
 ## Definitions
 
-`autobop` - Sets the bot to autobop (technically illegal) Useage: *autobop {num/left/clear}  
+`autobop` - Owner Command; Sets the bot to autobop (technically illegal) Useage: *autobop {num/left/clear}  
 [*autobop 6] will set bot to autobop for the next 6 songs, [*autobop left] will tell you how many   
 more song the bot will bop, and [*autobop clear] will set autobop to 0, thus clearing the autobop.  
 
@@ -41,6 +31,17 @@ limit to num minutes.
 `stagedive` - The bot (if moderator) will remove the user if they are a DJ, and then display a message  
 giving the DJ a sendoff for when they step down.  
 
-`maul` - Useage *maul <username>. Boots username off the decks
+`maul` -  Mod Command; Useage *maul <username>. Boots username off the decks
 
-`gtfo` - Useage *gtfo <username>. Boots username out of the room.
+`gtfo` - Mod Command; Useage *gtfo <username>. Boots username out of the room.
+
+`firedrill` - Mod Command; boots all off decks. 
+
+`shuffle` - Owner Command; When shuffle mode is activated, at beginning of each song, a random dj will
+get kicked off the decks. 
+
+`go & setgo` - Owner Command; *setgo name,roomid will an entry for quick room changes. Once set, send your bot away with 
+*go name. 
+
+## Too Much?
+Contact me - I offer Dedicated Bot Hosting And Management for $4/Month.
