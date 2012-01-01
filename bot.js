@@ -7,6 +7,7 @@ var autobop = 0;
 var songLimit = 0;
 var afk = 10;
 var theTheme;
+var miniBot;
 var bac = 0;
 var isOut = false;
 var shuffle = false;
@@ -75,8 +76,9 @@ Bot.prototype.onInitConfig = function (cb, err) {
   if (cb) {
     cb();
   }
-  ///////////////////////////////////Set the theme from config
+  ///////////////////////////////////Set custom values from config
   theTheme = this.config.messages.theme;
+  miniBot = this.config.minibot;
 };
 
 Bot.prototype.start = function (cb) {
@@ -149,7 +151,6 @@ Bot.prototype.bindHandlers = function () {
   this.friendCommandHandlers['banstuff'] = this.onBanCommands;
   this.friendCommandHandlers['greetings'] = this.onGreetCommands;
 
-  this.ownerCommandHandlers['owners'] = this.onOwners;
   this.ownerCommandHandlers['autome'] = this.onAuto;
   this.ownerCommandHandlers['blab'] = this.onBlab;
   this.ownerCommandHandlers['go'] = this.onGo;
@@ -157,6 +158,7 @@ Bot.prototype.bindHandlers = function () {
   this.ownerCommandHandlers['shuffle'] = this.onShuffle;
 
   this.hiddenCommandHandlers['freakthefuckout'] = this.onBonus;
+  this.hiddenCommandHandlers['friends'] = this.onFriends;
   this.hiddenCommandHandlers['moo'] = this.onMoo;
   this.shyCommandHandlers['bonus'] = this.onBonus;
 };
@@ -267,6 +269,7 @@ Bot.prototype.onSpeak = function (data) {
 ////////////////////////////////////////////Start Custom Code
 
 Bot.prototype.onDrink = function (text, userid, username) {
+if (miniBot == "true") { return };
     if (isOut == true) {
         this.say('/me is passed out.');
         return;
@@ -287,6 +290,7 @@ Bot.prototype.onDrink = function (text, userid, username) {
 };
 
 Bot.prototype.onShot = function (text, userid, username) {
+if (miniBot == "true") { return };
     if (isOut == true) {
         this.say('/me is passed out.');
         return;
@@ -307,6 +311,7 @@ Bot.prototype.onShot = function (text, userid, username) {
         }
 };
 Bot.prototype.onBlab = function () {
+if (miniBot == "true") { return };
   if (blabber != false) {
     blabber = false;
     this.say('I\'m going to shut up now.')
@@ -317,6 +322,7 @@ Bot.prototype.onBlab = function () {
   }
 };
 Bot.prototype.onGo = function (text, room) {
+if (miniBot == "true") { return };
     var room_name = Bot.splitCommand(text)[1];
     var room = room_name;
     if (!room_name) {
@@ -332,6 +338,7 @@ Bot.prototype.onGo = function (text, room) {
     this.ttapi.roomRegister(room);
 };
 Bot.prototype.onSetGo = function (text, userid, username) {
+if (miniBot == "true") { return };
     var args = Bot.splitCommand(text)[1];
     if (!args) {
         this.say("Usage: " + Bot.splitCommand(text)[0] + " <roomname>,<roomid>");
@@ -364,6 +371,7 @@ Bot.prototype.onGetTheme = function () {
 }
 
 Bot.prototype.onstageDive = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (this.djs[userid]) {
     stagedive = true;
     this.ttapi.remDj(userid)
@@ -382,6 +390,7 @@ Bot.prototype.djDive = function (stats) {
 };
 
 Bot.prototype.onAuto = function () {
+if (miniBot == "true") { return };
   if (auto != false) {
     auto = false;
     this.say('No bop for you.')
@@ -393,6 +402,7 @@ Bot.prototype.onAuto = function () {
 };
 
 Bot.prototype.onShuffle = function () {
+if (miniBot == "true") { return };
   if (shuffle != false) {
     shuffle = false;
     this.say('Shuffle Mode is Deactivated')
@@ -404,6 +414,7 @@ Bot.prototype.onShuffle = function () {
 };
 
 Bot.prototype.onAutoBop = function (text, number) {
+if (miniBot == "true") { return };
   var numBop = Bot.splitCommand(text)[1];
   if (!numBop) {
     this.say("Usage: " + Bot.splitCommand(text)[0] + " <num/left/clear>");
@@ -505,6 +516,7 @@ Bot.prototype.onMaul = function (text, userid, username) {
 };
 
 Bot.prototype.onDrill = function (text, userid, username) {
+if (miniBot == "true") { return };
     this.refreshRoomInfo();
     var thisdjs = this.roomInfo.room.metadata.djs
     this.ttapi.remDj(thisdjs[0]);
@@ -544,6 +556,7 @@ Bot.prototype.onBoot = function (text, userid, username) {
 };
 
 Bot.prototype.onMoo = function () {
+if (miniBot == "true") { return };
   this.say('I\'m not a cow, but okaMOOOOOOOO.')
 };
 
@@ -568,6 +581,7 @@ Bot.prototype.drunk = function (num) {
 /////////////////////////////////////////////////////End Custom Code
 /////////////////////////////////////////////////////Change Help
 Bot.prototype.onHelp = function () {
+if (miniBot == "true") { return };
   var helpline = this.config.messages.help
   if (this.djList.active && songLimit > 0) {
     this.say(helpline.replace(/\{theme\}/g, 'The theme is ' + theTheme).replace(/\{queue\}/g, 'there is a queue, type "q+" to get on it').replace(/\{limit\}/g, 'there\'s a ' + songLimit + ' song limit').replace(/\{afk\}/g, 'and an afk limit of ' + afk + ' minutes'));
@@ -585,50 +599,59 @@ Bot.prototype.onHelp = function () {
 
 /////////////////////////////////////////Set the command sorting
 Bot.prototype.onHelpCommands = function () {
+if (miniBot == "true") { return };
   this.say('commands: ' + Object.keys(this.commandHandlers).map(function (s) {
     return "*" + s;
   }).join(', '));
 };
 
 Bot.prototype.onHelpFriendCommands = function () {
+if (miniBot == "true") { return };
   this.say('friend commands: ' + Object.keys(this.friendCommandHandlers).map(function (s) {
     return "*" + s;
   }).join(', '));
 };
 
 Bot.prototype.onQueueCommands = function () {
+if (miniBot == "true") { return };
   this.say('queue commands: ' + Object.keys(this.qCommandHandlers).map(function (s) {
     return "*" + s;
   }).join(', '));
 };
 
 Bot.prototype.onQueueModCommands = function () {
+if (miniBot == "true") { return };
   this.say('queue mod commands: ' + Object.keys(this.qmodCommandHandlers).map(function (s) {
     return "*" + s;
   }).join(', '));
 };
 
 Bot.prototype.onBanCommands = function () {
+if (miniBot == "true") { return };
   this.say('ban commands: ' + Object.keys(this.banCommandHandlers).map(function (s) {
     return "*" + s;
   }).join(', '));
 };
 
 Bot.prototype.onGreetCommands = function () {
+if (miniBot == "true") { return };
   this.say('greet commands: ' + Object.keys(this.greetCommandHandlers).map(function (s) {
     return "*" + s;
   }).join(', '));
 };
 
 Bot.prototype.onAllCommands = function () {
+if (miniBot == "true") { return };
   this.say('*commands, *queue, *greetings, *modstuff, *qmods, *banstuff')
 };
 ///////////////////////////////////////End
 Bot.prototype.onOwners = function () {
+if (miniBot == "true") { return };
   this.say('my owners are: ' + Object.keys(this.config.owners).map(this.lookupUsername.bind(this)).join(', '));
 };
 
 Bot.prototype.onFriends = function () {
+if (miniBot == "true") { return };
   this.say('my friends are: ' + Object.keys(this.config.owners).concat(Object.keys(this.config.friends)).map(this.lookupUsername.bind(this)).join(', '));
 };
 
@@ -645,6 +668,7 @@ Bot.prototype.bonusCb = function (userid, data) {
 
 ///////////////////////////////////////////////Simplified Bonus
 Bot.prototype.onBonus = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (!this.currentSong || !this.currentSong.song) {
     return;
   }
@@ -656,6 +680,7 @@ Bot.prototype.onBonus = function (text, userid, username) {
 };
 
 Bot.prototype.onAlbum = function () {
+if (miniBot == "true") { return };
   if (this.currentSong && this.currentSong.song) {
     this.say(this.config.messages.album.replace(/\{song\}/g, this.currentSong.song.metadata.song).replace(/\{artist\}/g, this.currentSong.song.metadata.artist).replace(/\{album\}/g, this.currentSong.song.metadata.album || "(unknown)"));
   }
@@ -674,6 +699,7 @@ Bot.splitCommand = function (text) {
 };
 
 Bot.prototype.onLast = function (text, unused_userid, unused_username) {
+if (miniBot == "true") { return };
   var subject_name = Bot.splitCommand(text)[1];
   if (!subject_name) {
     this.say("Usage: " + Bot.splitCommand(text)[0] + " <username>");
@@ -732,6 +758,7 @@ Bot.prototype.onPlays = function (text, userid, username) {
 };
 
 Bot.prototype.onList = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (!this.djList.active) {
     this.say(this.config.messages.listInactive);
     return;
@@ -745,6 +772,7 @@ Bot.prototype.onList = function (text, userid, username) {
 };
 
 Bot.prototype.onListOn = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (this.djList.active) {
     this.say(this.config.messages.listAlreadyOn);
   }
@@ -756,6 +784,7 @@ Bot.prototype.onListOn = function (text, userid, username) {
 };
 
 Bot.prototype.onListOff = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (this.djList.active) {
     this.djList.active = false;
     this.djList.save(this.config.djlist_filename);
@@ -767,6 +796,7 @@ Bot.prototype.onListOff = function (text, userid, username) {
 };
 
 Bot.prototype.onListReset = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (this.djList) {
     this.djList.list = [];
     this.djList.save(this.config.djlist_filename);
@@ -775,6 +805,7 @@ Bot.prototype.onListReset = function (text, userid, username) {
 };
 
 Bot.prototype.onAddme = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (!this.djList.active) {
     this.say(this.config.messages.listInactive);
     return;
@@ -789,6 +820,7 @@ Bot.prototype.onAddme = function (text, userid, username) {
 };
 
 Bot.prototype.onAddFirst = function (text, userid, username) {
+if (miniBot == "true") { return };
   if (!this.djList.active) {
     this.say(this.config.messages.listInactive);
     return;
@@ -810,6 +842,7 @@ Bot.prototype.onAddFirst = function (text, userid, username) {
 };
 
 Bot.prototype.onRemoveme = function (text, userid, username) {
+if (miniBot == "true") { return };
   var i = this.djList.remove(userid);
   if (i !== -1) {
     this.djList.save(this.config.djlist_filename);
@@ -821,6 +854,7 @@ Bot.prototype.onRemoveme = function (text, userid, username) {
 };
 
 Bot.prototype.onRemove = function (text, userid, username) {
+if (miniBot == "true") { return };
   var subject_name = Bot.splitCommand(text)[1];
   if (!subject_name) {
     this.say("Usage: " + Bot.splitCommand(text)[0] + " <username>");
@@ -831,6 +865,7 @@ Bot.prototype.onRemove = function (text, userid, username) {
 };
 
 Bot.prototype.onRemoveFirst = function (text, userid, username) {
+if (miniBot == "true") { return };
   var removed_userid = this.djList.removeFirst();
   if (removed_userid) {
     this.say(this.config.messages.listRemoved.replace(/\{user\.name\}/g, this.lookupUsername(removed_userid)).replace(/\{position\}/g, 1));
@@ -898,6 +933,7 @@ Bot.prototype.onUnban = function (text, userid, username) {
 };
 
 Bot.prototype.onGreet = function (text, userid, username) {
+if (miniBot == "true") { return };
   var greeting = Bot.splitCommand(text)[1];
   if (!greeting || greeting.indexOf(username) === -1) {
     this.say("Usage: " + Bot.splitCommand(text)[0] + " <greeting> -- greeting must contain your name.");
@@ -909,6 +945,7 @@ Bot.prototype.onGreet = function (text, userid, username) {
 };
 
 Bot.prototype.onApproveGreeting = function (text, userid, username) {
+if (miniBot == "true") { return };
   var subject_name = Bot.splitCommand(text)[1];
   if (!subject_name) {
     this.say("Usage: " + Bot.splitCommand(text)[0] + " <username>");
@@ -928,6 +965,7 @@ Bot.prototype.onApproveGreeting = function (text, userid, username) {
 };
 
 Bot.prototype.onShowGreeting = function (text, userid, username) {
+if (miniBot == "true") { return };
   var subject_name = Bot.splitCommand(text)[1];
   if (!subject_name) {
     this.say("Usage: " + Bot.splitCommand(text)[0] + " <username>");
@@ -946,6 +984,7 @@ Bot.prototype.onShowGreeting = function (text, userid, username) {
 };
 
 Bot.prototype.onRejectGreeting = function (text, userid, username) {
+if (miniBot == "true") { return };
   var subject_name = Bot.splitCommand(text)[1];
   if (!subject_name) {
     this.say("Usage: " + Bot.splitCommand(text)[0] + " <username>");
@@ -971,6 +1010,7 @@ Bot.prototype.onRejectGreeting = function (text, userid, username) {
 };
 
 Bot.prototype.onPendingGreetings = function (text, userid, username) {
+if (miniBot == "true") { return };
   this.say(this.config.messages.pendingGreetings.replace(/\{list\}/, Object.keys(this.pendingGreetings).map(this.lookupUsername.bind(this)).join(', ')));
 };
 
@@ -980,8 +1020,10 @@ Bot.prototype.onRegistered = function (data) {
 }
 user = data.user[0];
 ////////////////////////////////////Blab
+if (miniBot !== "true") { 
 if (blabber != false && this.afkCheck(user.userid, 5) == true) {
     this.say(this.greeting(user));
+}
 }
   if (user.userid !== this.config.userid) {
     this.recordActivity(user.userid);
@@ -1125,6 +1167,7 @@ Bot.prototype.say = function (msg) {
 };
 
 Bot.prototype.onNewModerator = function (data) {
+if (miniBot == "true") { return };
   if (this.debug) {
     console.dir(data);
   }
@@ -1150,7 +1193,10 @@ Bot.prototype.onAddDj = function (data) {
       }
     }
   }
+if (miniBot == "true") { return };
+  if (user.userid != this.config.userid && blabber != false) {
   this.say(this.djAnnouncement(user));
+}
 };
 
 Bot.prototype.djSummary = function (stats) {
@@ -1169,6 +1215,7 @@ Bot.prototype.onRemDj = function (data) {
   this.recordActivity(user.userid);
   var stats = this.djs[user.userid];
   ///////////////////////Blab and stagedive and stuffs
+if (miniBot == "true") { return };
   if (blabber != false) {
     if (stats && data.user[0].userid != this.config.userid) {
       stats.update(user);
@@ -1221,7 +1268,17 @@ Bot.prototype.onNewSong = function (data) {
   /////////////Shuffle / Musical Chairs
   if (shuffle == true) {
       var unlucky = randomElement(this.roomInfo.room.metadata.djs);
+      var bootedname = this.lookupUsername(unlucky);
+      if (unlucky == this.currentDj) { 
+          var chance = Math.random();
+            if (chance > .5) {
+                this.ttapi.remDj(userid)
+            } else {
+                this.say('Oooh, you got lucky, '+bootedname)
+            }
+      } else {
       this.ttapi.remDj(unlucky);
+  }
     }
   /////////////AutoOwner && Autobop
   if (auto == true && this.config.owners[userid]) {

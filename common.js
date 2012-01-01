@@ -9,6 +9,7 @@ exports.conf = {
 	"usernames_filename": "usernames.json",
 	"djlist_filename": "djlist-{roomid}.json",
 	"banlist_filename": "banlist-{roomid}.json",
+	"minibot": "false",
 	"owners": {
 	},
 	"friends": {
